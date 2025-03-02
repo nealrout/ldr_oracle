@@ -6,11 +6,11 @@
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
 
     <!-- ChangeSet for Initialization -->
-
+<!--   _________________________FK_DROP_________________________  -->
     <changeSet id="FK_DROP" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/FK_DROP.sql" splitStatements="false"/>
     </changeSet>
-
+<!--   _________________________TABLES_________________________  -->
    <changeSet id="TABLE_LOAD_STATUS" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/table/TABLE_LOAD_STATUS.sql" splitStatements="false"/>
     </changeSet>
@@ -43,6 +43,10 @@
         <sqlFile path="sql/table/TABLE_ERR_VALIDATION_01.sql" splitStatements="false"/>
     </changeSet>
 
+    <changeSet id="TABLE_LDR_01" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_LDR_01.sql" splitStatements="false"/>
+    </changeSet>
+<!--   _________________________ROWS_________________________  -->
     <changeSet id="ROW_LOAD_STATUS" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/ROW_LOAD_STATUS.sql" splitStatements="false"/>
     </changeSet>
@@ -51,6 +55,10 @@
         <sqlFile path="sql/row/ROW_LOAD_STEP_TYPE.sql" splitStatements="false"/>
     </changeSet>
 
+    <changeSet id="ROW_STG_ACCOUNT" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/row/ROW_STG_ACCOUNT.sql" splitStatements="false"/>
+    </changeSet>
+<!--   _________________________FK_ADD_________________________  -->
     <changeSet id="FK_ADD" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/FK_ADD.sql" splitStatements="false"/>
     </changeSet>
