@@ -15,8 +15,8 @@
         <sqlFile path="sql/table/TABLE_LOAD_STATUS.sql" splitStatements="false"/>
     </changeSet>
 
-   <changeSet id="TABLE_LOAD_STEP_TYPE" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/TABLE_LOAD_STEP_TYPE.sql" splitStatements="false"/>
+   <changeSet id="TABLE_LOAD_STEP" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_LOAD_STEP.sql" splitStatements="false"/>
     </changeSet>
 
     <changeSet id="TABLE_LOAD_LOG" author="neal" runAlways="true" context="init">
@@ -51,8 +51,12 @@
         <sqlFile path="sql/row/ROW_LOAD_STATUS.sql" splitStatements="false"/>
     </changeSet>
 
-    <changeSet id="ROW_LOAD_STEP_TYPE" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/row/ROW_LOAD_STEP_TYPE.sql" splitStatements="false"/>
+    <changeSet id="ROW_LOAD_STEP" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/row/ROW_LOAD_STEP.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="ROW_LOAD_CONFIG" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/row/ROW_LOAD_CONFIG.sql" splitStatements="false"/>
     </changeSet>
 
     <changeSet id="ROW_STG_ACCOUNT" author="neal" runAlways="true" context="init">

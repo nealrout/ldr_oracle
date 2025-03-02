@@ -43,12 +43,26 @@ BEGIN
 
     FOR c IN (SELECT COUNT(*) cnt
               FROM user_constraints
+              WHERE constraint_name = 'FK_LOAD_STEP_LOAD_LOG_DETAIL_STEP_CODE'
+              AND table_name = 'LOAD_LOG_DETAIL') LOOP
+        IF c.cnt = 0 THEN
+            EXECUTE IMMEDIATE 'ALTER TABLE LOAD_LOG_DETAIL
+                               ADD CONSTRAINT FK_LOAD_STEP_LOAD_LOG_DETAIL_STEP_CODE
+                               FOREIGN KEY (STEP_CODE) REFERENCES LOAD_STEP(STEP_CODE)';
+            DBMS_OUTPUT.PUT_LINE('Foreign key constraint FK_LOAD_STEP_LOAD_LOG_DETAIL_STEP_CODE has been added.');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Foreign key constraint FK_LOAD_STEP_LOAD_LOG_DETAIL_STEP_CODE already exists.');
+        END IF;
+    END LOOP;
+
+    FOR c IN (SELECT COUNT(*) cnt
+              FROM user_constraints
               WHERE constraint_name = 'FK_LOAD_CONFIG_LOAD_TYPE_LOAD_TYPE_CODE'
               AND table_name = 'LOAD_CONFIG') LOOP
         IF c.cnt = 0 THEN
             EXECUTE IMMEDIATE 'ALTER TABLE LOAD_CONFIG
                                ADD CONSTRAINT FK_LOAD_CONFIG_LOAD_TYPE_LOAD_TYPE_CODE
-                               FOREIGN KEY (STEP_CODE) REFERENCES LOAD_STEP_TYPE(STEP_CODE)';
+                               FOREIGN KEY (STEP_CODE) REFERENCES LOAD_STEP(STEP_CODE)';
             DBMS_OUTPUT.PUT_LINE('Foreign key constraint FK_LOAD_CONFIG_LOAD_TYPE_LOAD_TYPE_CODE has been added.');
         ELSE
             DBMS_OUTPUT.PUT_LINE('Foreign key constraint FK_LOAD_CONFIG_LOAD_TYPE_LOAD_TYPE_CODE already exists.');
