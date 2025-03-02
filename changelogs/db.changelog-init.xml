@@ -31,20 +31,20 @@
         <sqlFile path="sql/table/TABLE_LOAD_CONFIG.sql" splitStatements="false"/>
     </changeSet>
 
-    <changeSet id="TABLE_STG_INPUT_01" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/TABLE_STG_INPUT_01.sql" splitStatements="false"/>
+    <changeSet id="TABLE_STG_INPUT" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_STG_INPUT.sql" splitStatements="false"/>
     </changeSet>
 
-    <changeSet id="TABLE_STG_TRANSFORM_01" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/TABLE_STG_TRANSFORM_01.sql" splitStatements="false"/>
+    <changeSet id="TABLE_STG_TRANSFORM" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_STG_TRANSFORM.sql" splitStatements="false"/>
     </changeSet>
 
-    <changeSet id="TABLE_ERR_VALIDATION_01" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/TABLE_ERR_VALIDATION_01.sql" splitStatements="false"/>
+    <changeSet id="TABLE_ERR_VALIDATION" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_ERR_VALIDATION.sql" splitStatements="false"/>
     </changeSet>
 
-    <changeSet id="TABLE_LDR_01" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/TABLE_LDR_01.sql" splitStatements="false"/>
+    <changeSet id="TABLE_LDR" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_LDR.sql" splitStatements="false"/>
     </changeSet>
 <!--   _________________________ROWS_________________________  -->
     <changeSet id="ROW_LOAD_STATUS" author="neal" runAlways="true" context="init">
