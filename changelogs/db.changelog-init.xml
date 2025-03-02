@@ -63,6 +63,16 @@
         <sqlFile path="sql/FK_ADD.sql" splitStatements="false"/>
     </changeSet>
 
+
+<!--   _________________________FUNCTINOS_________________________  -->
+
+
+
+<!--   _________________________PROCEDURES_________________________  -->
+    <changeSet id="PROC_PROCESS_MAPPED_FIELDS" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/procedure/PROC_PROCESS_MAPPED_FIELDS.sql" splitStatements="false"/>
+    </changeSet>
+
     <!-- <changeSet id="fk_drop" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/fk_drop.sql" splitStatements="false"/>
     </changeSet>

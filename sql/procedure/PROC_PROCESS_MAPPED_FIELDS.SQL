@@ -1,4 +1,6 @@
-CREATE OR REPLACE PROCEDURE PROC_PROCESSED_MAPPED_FIELDS (
+CREATE OR REPLACE PROCEDURE PROCESS_MAPPED_FIELDS (
+    p_load_log_id IN NUMBER,
+    p_load_log_detail_id IN NUMBER,
     p_step_code IN VARCHAR2,
     p_target_table IN VARCHAR2,
     p_source_table IN VARCHAR2
@@ -77,6 +79,8 @@ BEGIN
     -- Print the query for debugging
     DBMS_OUTPUT.PUT_LINE(v_merge_sql);
 
+    UPDATE LOAD_LOG_DETAIL SET SQL = v_merge_sql WHERE ID = p_load_log_detail_id;
+
     -- Check length before execution
     IF LENGTH(v_merge_sql) > 32767 THEN
         DBMS_OUTPUT.PUT_LINE('ERROR: Query too long! Switching to DBMS_SQL.PARSE().');
@@ -86,4 +90,4 @@ BEGIN
 EXCEPTION
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
-END SP_DYNAMIC_MERGE;
+END PROCESS_MAPPED_FIELDS;
