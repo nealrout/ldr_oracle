@@ -27,6 +27,10 @@
         <sqlFile path="sql/table/TABLE_LOAD_LOG_DETAIL.sql" splitStatements="false"/>
     </changeSet>
 
+    <changeSet id="TABLE_LOAD_CONFIG" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_LOAD_CONFIG.sql" splitStatements="false"/>
+    </changeSet>
+
     <changeSet id="TABLE_STG_INPUT_01" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/table/TABLE_STG_INPUT_01.sql" splitStatements="false"/>
     </changeSet>
@@ -46,7 +50,6 @@
     <changeSet id="ROW_LOAD_STEP_TYPE" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/ROW_LOAD_STEP_TYPE.sql" splitStatements="false"/>
     </changeSet>
-
 
     <changeSet id="FK_ADD" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/FK_ADD.sql" splitStatements="false"/>
