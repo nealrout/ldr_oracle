@@ -1,6 +1,18 @@
 BEGIN
     FOR c IN (SELECT COUNT(*) cnt
               FROM user_constraints
+              WHERE constraint_name = 'FK_LOAD_LOG_DETAIL_LOAD_LOG_ID'
+              AND table_name = 'LOAD_LOG_DETAIL') LOOP
+        IF c.cnt > 0 THEN
+            EXECUTE IMMEDIATE 'ALTER TABLE LOAD_LOG_DETAIL DROP CONSTRAINT FK_LOAD_LOG_DETAIL_LOAD_LOG_ID';
+            DBMS_OUTPUT.PUT_LINE('Foreign key constraint FK_LOAD_LOG_DETAIL_LOAD_LOG_ID has been dropped.');
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Foreign key constraint FK_LOAD_LOG_DETAIL_LOAD_LOG_ID does not exist.');
+        END IF;
+    END LOOP;
+
+    FOR c IN (SELECT COUNT(*) cnt
+              FROM user_constraints
               WHERE constraint_name = 'FK_LOAD_STATUS_LOAD_LOG_STATUS_CODE'
               AND table_name = 'LOAD_LOG') LOOP
         IF c.cnt > 0 THEN
