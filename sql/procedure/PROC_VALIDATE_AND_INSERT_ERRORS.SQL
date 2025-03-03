@@ -5,11 +5,13 @@ CREATE OR REPLACE PROCEDURE VALIDATE_AND_INSERT_ERRORS (
     p_tgt_table IN VARCHAR2
 ) AS
     v_sql VARCHAR2(4000);
+	v_unique_identifier VARCHAR2(4000);
     v_fieldname VARCHAR2(255);
     v_validation VARCHAR2(4000);
     v_cursor SYS_REFCURSOR;
     
     TYPE rec_type IS RECORD (
+    	UNIQUE_IDENTIFIER VARCHAR2(4000),
         field_name VARCHAR2(255),
         validation VARCHAR2(4000)
     );
@@ -22,13 +24,14 @@ CREATE OR REPLACE PROCEDURE VALIDATE_AND_INSERT_ERRORS (
     
 BEGIN
     -- Extract validation rules from CONFIG dynamically
-    SELECT FIELDNAME, VALIDATION 
+    SELECT UNIQUE_IDENTIFIER, FIELDNAME, VALIDATION 
     BULK COLLECT INTO v_validations
     FROM (
-        SELECT jt.FIELDNAME, jt.VALIDATION
+        SELECT jt.UNIQUE_IDENTIFIER, jt.FIELDNAME, jt.VALIDATION
         FROM LOAD_CONFIG l,
         JSON_TABLE(l.CONFIG, '$' 
             COLUMNS (
+                UNIQUE_IDENTIFIER CLOB PATH '$.uniqueIdentifier',
                 NESTED PATH '$.validations[*]' 
                 COLUMNS (
                     FIELDNAME VARCHAR2(255) PATH '$.fieldName',
@@ -36,11 +39,12 @@ BEGIN
                 )
             )
         ) jt
-        WHERE l.STEP_CODE = 'VALIDATE'
+        WHERE l.STEP_CODE = 'VALIDATE' AND SRC_TABLE = p_src_table AND TGT_TABLE = p_tgt_table
     );
 
     -- Loop through each validation rule and apply it
     FOR i IN 1..v_validations.COUNT LOOP
+	    v_unique_identifier := v_validations(i).UNIQUE_IDENTIFIER;
         v_fieldname := v_validations(i).field_name;
         v_validation := v_validations(i).validation;
         
@@ -57,10 +61,10 @@ BEGIN
         
             -- Insert failed record into ERR_VALIDATION
             INSERT INTO ERR_VALIDATION (
-                LOAD_LOG_ID, LOAD_LOG_DETAIL_ID, SRC_TABLE, TGT_TABLE, 
+                LOAD_LOG_ID, LOAD_LOG_DETAIL_ID, SRC_TABLE, TGT_TABLE, UNIQUE_IDENTIFIER,
                 FIELD_NAME, VALIDATION, FIELD_VALUE, ERROR_CODE, ERROR_MESSAGE, CREATE_TS
             ) VALUES (
-                p_load_log_id, p_load_log_detail_id, p_src_table, p_tgt_table, 
+                p_load_log_id, p_load_log_detail_id, p_src_table, p_tgt_table, v_unique_identifier,
                 v_fieldname, v_validation, v_field_value, 
                 'ERROR_CODE', 'Validation Failed', v_create_ts
             );
