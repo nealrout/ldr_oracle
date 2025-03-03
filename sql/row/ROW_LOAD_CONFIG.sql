@@ -1,5 +1,16 @@
 BEGIN
     INSERT INTO LOAD_CONFIG(STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
+    VALUES ('VALIDATE', 'STG_INPUT_01', 'ERR_VALIDATION', 
+            '{"validations":
+                [
+                    {"fieldName": "FIELD_003", "validation":"DBMS_LOB.GETLENGTH(FIELD_003) < 20"}, 
+                    {"fieldName": "FIELD_005", "validation":"REGEXP_LIKE(DBMS_LOB.SUBSTR(FIELD_005, 100, 1), ''^[+-]?\\d+(\\.\\d+)?$'')"}
+                ],
+            "uniqueIdentifier":"FIELD_001"
+            }', 
+            SYSTIMESTAMP);
+
+    INSERT INTO LOAD_CONFIG(STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
     VALUES ('PROCESS_MAPPED', 'STG_INPUT_01', 'STG_MAP_01', 
             '{"mappings":
                 [
@@ -12,17 +23,18 @@ BEGIN
             "uniqueIdentifier":"FIELD_001"
             }', 
             SYSTIMESTAMP);
+
     INSERT INTO LOAD_CONFIG(STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
-    VALUES ('VALIDATE', 'STG_INPUT_01', 'ERR_VALIDATION', 
-            '{"validations":
+    VALUES ('TRANSFORM_INLINE', 'STG_MAP_01', 'STG_TRANSFORM_01', 
+            '{"transformations":
                 [
-                    {"fieldName": "FIELD_003", "validation":"DBMS_LOB.GETLENGTH(FIELD_003) < 20"}, 
-                    {"fieldName": "FIELD_005", "validation":"REGEXP_LIKE(DBMS_LOB.SUBSTR(FIELD_005, 100, 1), ''^[+-]?\\d+(\\.\\d+)?$'')"}
+                    {"fieldName":"FIELD_002","transformation":"TRANSLATE(LOWER(TRIM(FIELD_002)),''_'',''-'')"},
+                    {"fieldName":"FIELD_003","transformation":"TRANSLATE(LOWER(TRIM(FIELD_003)),''_'',''-'')"},
+                    {"fieldName":"FIELD_004","transformation":"TRANSLATE(LOWER(TRIM(FIELD_004)),''_'',''-'')"},
+                    {"fieldName":"FIELD_005","transformation":"TRANSLATE(LOWER(TRIM(FIELD_005)),''_'',''-'')"}
                 ],
             "uniqueIdentifier":"FIELD_001"
             }', 
             SYSTIMESTAMP);
-
-
     COMMIT;
 END;
