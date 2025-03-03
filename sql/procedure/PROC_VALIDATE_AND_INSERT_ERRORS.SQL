@@ -6,6 +6,7 @@ CREATE OR REPLACE PROCEDURE VALIDATE_AND_INSERT_ERRORS (
 ) AS
     v_sql VARCHAR2(4000);
 	v_unique_identifier VARCHAR2(4000);
+    v_unique_identifier_value CLOB;
     v_fieldname VARCHAR2(255);
     v_validation VARCHAR2(4000);
     v_cursor SYS_REFCURSOR;
@@ -49,22 +50,22 @@ BEGIN
         v_validation := v_validations(i).validation;
         
         -- Construct dynamic SQL to find invalid records
-        v_sql := 'SELECT ' || v_fieldname || ', CREATE_TS
+        v_sql := 'SELECT ' || v_fieldname || ',' || v_unique_identifier || ', CREATE_TS
                   FROM ' || p_src_table || ' 
                   WHERE NOT (' || v_validation || ')';
         
         OPEN v_cursor FOR v_sql;
         
         LOOP
-            FETCH v_cursor INTO v_field_value, v_create_ts;
+            FETCH v_cursor INTO v_field_value, v_unique_identifier_value, v_create_ts;
             EXIT WHEN v_cursor%NOTFOUND;
         
             -- Insert failed record into ERR_VALIDATION
             INSERT INTO ERR_VALIDATION (
-                LOAD_LOG_ID, LOAD_LOG_DETAIL_ID, SRC_TABLE, TGT_TABLE, UNIQUE_IDENTIFIER,
+                LOAD_LOG_ID, LOAD_LOG_DETAIL_ID, SRC_TABLE, TGT_TABLE, UNIQUE_IDENTIFIER, UNIQUE_IDENTIFIER_VALUE,
                 FIELD_NAME, VALIDATION, FIELD_VALUE, ERROR_CODE, ERROR_MESSAGE, CREATE_TS
             ) VALUES (
-                p_load_log_id, p_load_log_detail_id, p_src_table, p_tgt_table, v_unique_identifier,
+                p_load_log_id, p_load_log_detail_id, p_src_table, p_tgt_table, v_unique_identifier, v_unique_identifier_value,
                 v_fieldname, v_validation, v_field_value, 
                 'ERROR_CODE', 'Validation Failed', v_create_ts
             );
