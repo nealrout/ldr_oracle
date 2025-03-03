@@ -1,7 +1,6 @@
 CREATE OR REPLACE PROCEDURE PROCESS_MAPPED_FIELDS (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,
-    p_step_code IN VARCHAR2,
     p_target_table IN VARCHAR2,
     p_source_table IN VARCHAR2
 )
@@ -19,14 +18,16 @@ BEGIN
 
     v_update_columns := '';
     v_insert_columns := 'LOAD_LOG_ID, CREATE_TS, ';
-    v_insert_values := '1, SYSTIMESTAMP, ';
+    v_insert_values := p_load_log_id || ', SYSTIMESTAMP, ';
 
     -- Loop through column mappings
     FOR rec IN (
         WITH json_data AS (
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
             FROM LOAD_CONFIG
-            WHERE STEP_CODE = p_step_code AND SRC_TABLE = p_source_table AND TGT_TABLE = p_target_table
+            WHERE STEP_CODE = 'PROCESS_MAPPED'   
+            AND UPPER(SRC_TABLE) = UPPER(p_source_table)
+            AND UPPER(TGT_TABLE) = UPPER(p_target_table) 
         ),
         cte_parsed_json AS (
             SELECT 
@@ -72,6 +73,9 @@ BEGIN
     -- Construct final MERGE statement
     IF v_update_columns IS NOT NULL THEN
         v_merge_sql := v_merge_sql || ' ' || v_update_columns;
+    ELSE
+        -- If no columns to update, remove the `WHEN MATCHED` clause
+        v_merge_sql := REPLACE(v_merge_sql, 'WHEN MATCHED THEN UPDATE SET ', '');
     END IF;
 
     v_merge_sql := v_merge_sql || ' WHEN NOT MATCHED THEN INSERT (' || v_insert_columns || ') VALUES (' || v_insert_values || ')';
