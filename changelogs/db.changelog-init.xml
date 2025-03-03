@@ -35,6 +35,10 @@
         <sqlFile path="sql/table/TABLE_STG_INPUT.sql" splitStatements="false"/>
     </changeSet>
 
+    <changeSet id="TABLE_STG_MAP" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_STG_MAP.sql" splitStatements="false"/>
+    </changeSet>
+
     <changeSet id="TABLE_STG_TRANSFORM" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/table/TABLE_STG_TRANSFORM.sql" splitStatements="false"/>
     </changeSet>
