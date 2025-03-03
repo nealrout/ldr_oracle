@@ -11,10 +11,46 @@ IS
     v_insert_values VARCHAR2(32767);
     v_unique_identifier VARCHAR2(4000);
 BEGIN
-    -- Initialize SQL fragments with dynamic table names
+    -- Fetch the unique identifier dynamically
+    SELECT DISTINCT uniqueIdentifier 
+    INTO v_unique_identifier
+    FROM (
+        WITH json_data AS (
+            SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
+            FROM LOAD_CONFIG
+            WHERE STEP_CODE = 'PROCESS_MAPPED'   
+            AND UPPER(SRC_TABLE) = UPPER(p_source_table)
+            AND UPPER(TGT_TABLE) = UPPER(p_target_table) 
+        ),
+        cte_parsed_json AS (
+            SELECT 
+                j.ID, 
+                j.STEP_CODE,
+                j.SRC_TABLE, 
+                j.TGT_TABLE, 
+                DBMS_LOB.SUBSTR(jt.srcField, 4000, 1) AS srcField, 
+                DBMS_LOB.SUBSTR(jt.tgtField, 4000, 1) AS tgtField,
+                DBMS_LOB.SUBSTR(jt.uniqueIdentifier, 4000, 1) AS uniqueIdentifier
+            FROM json_data j,
+            JSON_TABLE(j.CONFIG, '$' 
+                COLUMNS (
+                    uniqueIdentifier CLOB PATH '$.uniqueIdentifier',
+                    NESTED PATH '$.mappings[*]' 
+                    COLUMNS (
+                        srcField CLOB PATH '$.srcField',
+                        tgtField CLOB PATH '$.tgtField'
+                    )
+                )
+            ) jt
+        )
+        SELECT DISTINCT uniqueIdentifier FROM cte_parsed_json
+    )
+    WHERE ROWNUM = 1; -- Ensuring a single unique identifier
+
+    -- Initialize SQL fragments with dynamic table names and unique identifier
     v_merge_sql := 'MERGE INTO ' || p_target_table || ' target USING ' || p_source_table || ' source ON (' ||
-                   'DBMS_LOB.SUBSTR(target.FIELD_001, 4000, 1) = ' ||
-                   'DBMS_LOB.SUBSTR(source.FIELD_001, 4000, 1)) WHEN MATCHED THEN UPDATE SET ';
+                   'DBMS_LOB.SUBSTR(target.' || v_unique_identifier || ', 4000, 1) = ' ||
+                   'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1)) WHEN MATCHED THEN UPDATE SET ';
 
     v_update_columns := '';
     v_insert_columns := 'LOAD_LOG_ID, CREATE_TS, ';
@@ -50,11 +86,8 @@ BEGIN
                 )
             ) jt
         )
-        SELECT DISTINCT srcField, tgtField, uniqueIdentifier FROM cte_parsed_json
+        SELECT DISTINCT srcField, tgtField FROM cte_parsed_json
     ) LOOP
-        -- Store the unique identifier (FIELD_001)
-        v_unique_identifier := rec.uniqueIdentifier;
-
         -- Exclude the unique identifier from UPDATE SET
         IF rec.tgtField <> v_unique_identifier THEN
             v_update_columns := v_update_columns || 'target.' || rec.tgtField || ' = source.' || rec.srcField || ', ';
