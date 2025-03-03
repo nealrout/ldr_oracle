@@ -113,6 +113,14 @@ BEGIN
 
     v_merge_sql := v_merge_sql || ' WHEN NOT MATCHED THEN INSERT (' || v_insert_columns || ') VALUES (' || v_insert_values || ')';
 
+    -- Append the WHERE NOT EXISTS condition dynamically
+    v_merge_sql := v_merge_sql || ' WHERE NOT EXISTS (' ||
+                   'SELECT 1 FROM ERR_VALIDATION EV ' ||
+                   'WHERE EV.LOAD_LOG_ID = ' || p_load_log_id || 
+                   ' AND EV.UNIQUE_IDENTIFIER = ''' || v_unique_identifier || '''' ||
+                   ' AND DBMS_LOB.SUBSTR(EV.UNIQUE_IDENTIFIER_VALUE, 4000, 1) = ' ||
+                   'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1))';
+
     -- Print the query for debugging
     DBMS_OUTPUT.PUT_LINE(v_merge_sql);
 
