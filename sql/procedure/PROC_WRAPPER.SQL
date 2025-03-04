@@ -45,15 +45,17 @@ BEGIN
 	
 	SELECT MAX(STEP_NUMBER) INTO v_max_step_number
 	FROM LOAD_STEP;
-	-------------------------------------------------------------------------------
+	/*************************************************************************************
+	 * 									LOAD_LOG LOGIC
+	 *************************************************************************************/
 	
 	IF v_count_running > 0 THEN
-		SELECT ID INTO v_load_log_id FROM LOAD_LOG WHERE STATUS_CODE = 'RUNNING'
+		SELECT ID INTO v_load_log_id FROM LOAD_LOG WHERE STATUS_CODE = v_status_code_running
 		ORDER BY START_TS DESC
 		FETCH FIRST 1 ROW ONLY;
 	ELSE
 		IF v_count_failed > 0 THEN
-			SELECT ID INTO v_load_log_id FROM LOAD_LOG WHERE STATUS_CODE = 'FAILED'
+			SELECT ID INTO v_load_log_id FROM LOAD_LOG WHERE STATUS_CODE = v_status_code_failed
 			ORDER BY START_TS DESC
 			FETCH FIRST 1 ROW ONLY;
 		ELSE
@@ -71,6 +73,9 @@ BEGIN
 	SELECT COUNT(*) INTO v_count_success FROM LOAD_LOG_DETAIL WHERE LOAD_LOG_ID = v_load_log_id AND STATUS_CODE = v_status_code_success;
 	SELECT COUNT(*) INTO v_count_failed FROM LOAD_LOG_DETAIL WHERE LOAD_LOG_ID = v_load_log_id AND STATUS_CODE = v_status_code_failed;
 		
+	/*************************************************************************************
+	 * 								LOAD_LOG_DETAIL LOGIC
+	 *************************************************************************************/
 	IF v_count_running > 0 THEN															--RECOVER LAST RUNNING LOAD_LOG_DETAIL
 		SELECT ID, STEP_CODE INTO v_load_log_detail_id, v_load_step_code
 		FROM LOAD_LOG_DETAIL 
@@ -123,7 +128,16 @@ BEGIN
 	
 	
 	DBMS_OUTPUT.PUT_LINE('v_load_log_id' || v_load_log_id || ', v_load_log_detail_id: '|| v_load_log_detail_id || ', v_load_step_code: ' || v_load_step_code);
-	
+	/*************************************************************************************
+	 * 								PROCESSOR LOGIC
+	 *************************************************************************************
+	 *This will determine where we need to recover from.  The LOAD_STEP table had the 
+	 *steps of this loader in order.  This will determien which step to start at based
+	 *on the current v_load_step_code.  This was determined by looking at the LOAD_LOG_DETAIL
+	 *table for our current LOAD_LOG.  If the previous job failed, or got stuck running, it will
+	 *recover from that job forward.  Otherwise it will be fresh and run all of them in order.
+	 *
+	 */
 	
     -- Initialize procedure mapping
     v_procedures('VALIDATE') := 'VALIDATE_AND_INSERT_ERRORS';
@@ -234,5 +248,13 @@ end;
 END;
 
 /*
+UPDATE LOAD_LOG SET STATUS_CODE = 'FAILED';
+UPDATE LOAD_LOG_DETAIL SET STATUS_CODE = 'FAILED';
+delete from load_log_detail;
+delete from LOAD_LOG;
+SELECT * FROM LOAD_LOG;
+SELECT * FROM LOAD_LOG_DETAIL;
+select * FROM LOAD_STEP;
 
+SELECT * FROM LOAD_LOG_DETAIL WHERE LOAD_LOG_ID = -1 AND STATUS_CODE <> 'SUCCESS' ORDER BY START_TS DESC;
 */
