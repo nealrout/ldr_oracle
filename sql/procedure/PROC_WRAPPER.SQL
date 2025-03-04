@@ -219,29 +219,24 @@ begin
     PROCESS_MAPPED_FIELDS(
         p_load_log_id => 1,           
         p_load_log_detail_id => 2,    
-        p_source_table => 'STG_INPUT_01',
-        p_target_table => 'STG_MAP_01'
+        p_src_table => 'STG_INPUT_01',
+        p_tgt_table => 'STG_MAP_01'
     );
 end;
-	PROCESS_NON_MAPPED_FIELDS(
-        p_load_log_id => -1,           
-        p_load_log_detail_id => -1,    
-        p_source_table => 'STG_INPUT_01',
-        p_target_table => 'STG_MAP_01'
-    );
 
-	TRANSFORM_INLINE(
-        p_load_log_id => -1,           
-        p_load_log_detail_id => -1,    
-        p_source_table => 'STG_INPUT_01',
-        p_target_table => 'STG_MAP_01'
-    );
+	PROCESS_TRANSFORM_INLINE(
+		p_load_log_id => -1,           
+		p_load_log_detail_id => -4,    
+		p_src_table => 'STG_MAP_01',
+		p_tgt_table => 'STG_TRANSFORM_01'
+	);
+		
 	
 	TRANSFORM_AGGREGATE(
         p_load_log_id => -1,           
         p_load_log_detail_id => -1,    
-        p_source_table => 'STG_INPUT_01',
-        p_target_table => 'STG_MAP_01'
+        p_src_table => 'STG_INPUT_01',
+        p_tgt_table => 'STG_MAP_01'
     );
 */
 END;
