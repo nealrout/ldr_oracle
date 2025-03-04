@@ -28,10 +28,10 @@ BEGIN
     VALUES ('TRANSFORM_INLINE', 'STG_MAP_01', 'STG_TRANSFORM_01', 
             '{"transformations":
                 [
-                    {"fieldName":"FIELD_002","transformation":"TRANSLATE(LOWER(TRIM(FIELD_002)),''_'',''-'')"},
-                    {"fieldName":"FIELD_003","transformation":"TRANSLATE(LOWER(TRIM(FIELD_003)),''_'',''-'')"},
-                    {"fieldName":"FIELD_004","transformation":"TRANSLATE(LOWER(TRIM(FIELD_004)),''_'',''-'')"},
-                    {"fieldName":"FIELD_005","transformation":"TRANSLATE(LOWER(TRIM(FIELD_005)),''_'',''-'')"}
+                    {"fieldName":"FIELD_002","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
+                    {"fieldName":"FIELD_003","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
+                    {"fieldName":"FIELD_004","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
+                    {"fieldName":"FIELD_005","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"}
                 ],
             "uniqueIdentifier":"FIELD_001"
             }', 

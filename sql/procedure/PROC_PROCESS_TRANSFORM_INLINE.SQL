@@ -19,8 +19,8 @@ BEGIN
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
             FROM LOAD_CONFIG
             WHERE STEP_CODE = 'TRANSFORM_INLINE'   
-            AND UPPER(SRC_TABLE) = UPPER('STG_MAP_01')
-            AND UPPER(TGT_TABLE) = UPPER('STG_TRANSFORM_01') 
+            AND UPPER(SRC_TABLE) = UPPER(p_src_table)
+            AND UPPER(TGT_TABLE) = UPPER(p_tgt_table) 
         ),
         cte_parsed_json AS (
             SELECT 
@@ -47,7 +47,7 @@ BEGIN
     )
     WHERE ROWNUM = 1; -- Ensuring a single unique identifier
 
-    -- Initialize SQL fragments with dynamic table names and unique identifier
+    -- Initialize SQL fragments
     v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING ' || p_src_table || ' source ON (' ||
                    'DBMS_LOB.SUBSTR(target.' || v_unique_identifier || ', 4000, 1) = ' ||
                    'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1)) WHEN MATCHED THEN UPDATE SET ';
@@ -62,8 +62,8 @@ BEGIN
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
             FROM LOAD_CONFIG
             WHERE STEP_CODE = 'TRANSFORM_INLINE'   
-            AND UPPER(SRC_TABLE) = UPPER('STG_MAP_01')
-            AND UPPER(TGT_TABLE) = UPPER('STG_TRANSFORM_01') 
+            AND UPPER(SRC_TABLE) = UPPER(p_src_table)
+            AND UPPER(TGT_TABLE) = UPPER(p_tgt_table) 
         ),
         cte_parsed_json AS (
             SELECT 
@@ -88,14 +88,21 @@ BEGIN
         )
         SELECT DISTINCT fieldName, transformation FROM cte_parsed_json
     ) LOOP
-        -- Exclude the unique identifier from UPDATE SET
-        IF rec.fieldName <> v_unique_identifier THEN
-            v_update_columns := v_update_columns || 'target.' || rec.fieldName || ' = source.' || rec.transformation || ', ';
-        END IF;
+        -- Replace "STATIC_FIELD_NAME" with the actual column name (source.FIELD_XXX)
+        DECLARE
+            v_actual_transformation VARCHAR2(4000);
+        BEGIN
+            v_actual_transformation := REPLACE(rec.transformation, 'STATIC_FIELD_NAME', 'source.' || rec.fieldName);
 
-        -- Include all fields in INSERT
-        v_insert_columns := v_insert_columns || rec.fieldName || ', ';
-        v_insert_values := v_insert_values || 'source.' || rec.transformation || ', ';
+            -- Exclude the unique identifier from UPDATE SET
+            IF rec.fieldName <> v_unique_identifier THEN
+                v_update_columns := v_update_columns || 'target.' || rec.fieldName || ' = ' || v_actual_transformation || ', ';
+            END IF;
+
+            -- Include all fields in INSERT
+            v_insert_columns := v_insert_columns || rec.fieldName || ', ';
+            v_insert_values := v_insert_values || v_actual_transformation || ', ';
+        END;
     END LOOP;
 
     -- Fix trailing commas
@@ -107,25 +114,16 @@ BEGIN
     IF v_update_columns IS NOT NULL THEN
         v_merge_sql := v_merge_sql || ' ' || v_update_columns;
     ELSE
-        -- If no columns to update, remove the `WHEN MATCHED` clause
         v_merge_sql := REPLACE(v_merge_sql, 'WHEN MATCHED THEN UPDATE SET ', '');
     END IF;
 
     v_merge_sql := v_merge_sql || ' WHEN NOT MATCHED THEN INSERT (' || v_insert_columns || ') VALUES (' || v_insert_values || ')';
 
---     Append the WHERE NOT EXISTS condition dynamically
---    v_merge_sql := v_merge_sql || ' WHERE NOT EXISTS (' ||
---                   'SELECT 1 FROM ERR_VALIDATION EV ' ||
---                   'WHERE EV.LOAD_LOG_ID = ' || p_load_log_id || 
---                   ' AND EV.UNIQUE_IDENTIFIER = ''' || v_unique_identifier || '''' ||
---                   ' AND DBMS_LOB.SUBSTR(EV.UNIQUE_IDENTIFIER_VALUE, 4000, 1) = ' ||
---                   'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1))';
+    -- Debugging: Print final SQL
+    DBMS_OUTPUT.PUT_LINE('SQL: ' || v_merge_sql);
 
-    -- Print the query for debugging
-    DBMS_OUTPUT.PUT_LINE(v_merge_sql);
-
---    UPDATE LOAD_LOG_DETAIL SET SQL = v_merge_sql WHERE ID = p_load_log_detail_id;
-    UPDATE LOAD_LOG_DETAIL SET SQL = v_merge_sql WHERE ID = -4;
+    -- Update log
+    UPDATE LOAD_LOG_DETAIL SET SQL = v_merge_sql WHERE ID = p_load_log_detail_id;
 
     -- Check length before execution
     IF LENGTH(v_merge_sql) > 32767 THEN
@@ -133,6 +131,7 @@ BEGIN
     ELSE
         EXECUTE IMMEDIATE v_merge_sql;
     END IF;
+
 EXCEPTION
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);

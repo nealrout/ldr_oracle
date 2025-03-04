@@ -122,7 +122,7 @@ BEGIN
                    'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1))';
 
     -- Print the query for debugging
-    DBMS_OUTPUT.PUT_LINE(v_merge_sql);
+    DBMS_OUTPUT.PUT_LINE('SQL: ' || v_merge_sql);
 
     UPDATE LOAD_LOG_DETAIL SET SQL = v_merge_sql WHERE ID = p_load_log_detail_id;
 
