@@ -80,11 +80,15 @@
     </changeSet>
 
 
-<!--   _________________________FUNCTINOS_________________________  -->
+<!--   _________________________FUNCTIONS_________________________  -->
 
 
 
 <!--   _________________________PROCEDURES_________________________  -->
+    <changeSet id="PROC_VALIDATE_AND_INSERT_ERRORS" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/procedure/PROC_VALIDATE_AND_INSERT_ERRORS.sql" splitStatements="false"/>
+    </changeSet>
+
     <changeSet id="PROC_PROCESS_MAPPED_FIELDS" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/procedure/PROC_PROCESS_MAPPED_FIELDS.sql" splitStatements="false"/>
     </changeSet>

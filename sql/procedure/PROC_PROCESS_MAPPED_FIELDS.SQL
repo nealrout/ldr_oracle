@@ -1,8 +1,8 @@
 CREATE OR REPLACE PROCEDURE PROCESS_MAPPED_FIELDS (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,
-    p_target_table IN VARCHAR2,
-    p_source_table IN VARCHAR2
+    p_tgt_table IN VARCHAR2,
+    p_src_table IN VARCHAR2
 )
 IS
     v_merge_sql VARCHAR2(32767);  
@@ -19,8 +19,8 @@ BEGIN
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
             FROM LOAD_CONFIG
             WHERE STEP_CODE = 'PROCESS_MAPPED'   
-            AND UPPER(SRC_TABLE) = UPPER(p_source_table)
-            AND UPPER(TGT_TABLE) = UPPER(p_target_table) 
+            AND UPPER(SRC_TABLE) = UPPER(p_src_table)
+            AND UPPER(TGT_TABLE) = UPPER(p_tgt_table) 
         ),
         cte_parsed_json AS (
             SELECT 
@@ -48,7 +48,7 @@ BEGIN
     WHERE ROWNUM = 1; -- Ensuring a single unique identifier
 
     -- Initialize SQL fragments with dynamic table names and unique identifier
-    v_merge_sql := 'MERGE INTO ' || p_target_table || ' target USING ' || p_source_table || ' source ON (' ||
+    v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING ' || p_src_table || ' source ON (' ||
                    'DBMS_LOB.SUBSTR(target.' || v_unique_identifier || ', 4000, 1) = ' ||
                    'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1)) WHEN MATCHED THEN UPDATE SET ';
 
@@ -62,8 +62,8 @@ BEGIN
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
             FROM LOAD_CONFIG
             WHERE STEP_CODE = 'PROCESS_MAPPED'   
-            AND UPPER(SRC_TABLE) = UPPER(p_source_table)
-            AND UPPER(TGT_TABLE) = UPPER(p_target_table) 
+            AND UPPER(SRC_TABLE) = UPPER(p_src_table)
+            AND UPPER(TGT_TABLE) = UPPER(p_tgt_table) 
         ),
         cte_parsed_json AS (
             SELECT 
