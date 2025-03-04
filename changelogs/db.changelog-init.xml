@@ -10,7 +10,7 @@
     <changeSet id="FK_DROP" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/FK_DROP.sql" splitStatements="false"/>
     </changeSet>
-<!--   _________________________TABLES_________________________  -->
+<!--   _________________________TABLES LOAD_________________________  -->
    <changeSet id="TABLE_LOAD_STATUS" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/table/TABLE_LOAD_STATUS.sql" splitStatements="false"/>
     </changeSet>
@@ -30,7 +30,7 @@
     <changeSet id="TABLE_LOAD_CONFIG" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/table/TABLE_LOAD_CONFIG.sql" splitStatements="false"/>
     </changeSet>
-
+<!--   _________________________TABLES STG/LDR/ERR_________________________  -->
     <changeSet id="TABLE_STG_INPUT" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/table/TABLE_STG_INPUT.sql" splitStatements="false"/>
     </changeSet>
@@ -49,6 +49,30 @@
 
     <changeSet id="TABLE_LDR" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/table/TABLE_LDR.sql" splitStatements="false"/>
+    </changeSet>
+<!--   _________________________TABLES OUT_________________________  -->
+    <changeSet id="TABLE_OUT_ACCOUNT" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_OUT_ACCOUNT.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="TABLE_OUT_FACILITY" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_OUT_FACILITY.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="TABLE_OUT_ASSET" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_OUT_ASSET.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="TABLE_OUT_SERVICE" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_OUT_SERVICE.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="TABLE_OUT_ASSET_STATUS" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_OUT_ASSET_STATUS.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="TABLE_OUT_SERVICE_STATUS" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_OUT_SERVICE_STATUS.sql" splitStatements="false"/>
     </changeSet>
 <!--   _________________________ROWS_________________________  -->
     <changeSet id="ROW_LOAD_STATUS" author="neal" runAlways="true" context="init">
