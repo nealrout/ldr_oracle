@@ -11,7 +11,7 @@ BEGIN
             SYSTIMESTAMP);
 
     INSERT INTO LOAD_CONFIG(STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
-    VALUES ('PROCESS_MAPPED', 'STG_INPUT_01', 'STG_MAP_01', 
+    VALUES ('MAP_FIELDS', 'STG_INPUT_01', 'STG_MAP_01', 
             '{"mappings":
                 [
                     {"srcField":"FIELD_001","tgtField":"FIELD_001"},
