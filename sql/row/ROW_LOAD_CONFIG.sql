@@ -3,8 +3,8 @@ BEGIN
     VALUES ('VALIDATE', 'STG_INPUT_01', 'ERR_VALIDATION', 
             '{"validations":
                 [
-                    {"fieldName": "FIELD_003", "validation":"DBMS_LOB.GETLENGTH(FIELD_003) < 20"}, 
-                    {"fieldName": "FIELD_005", "validation":"REGEXP_LIKE(DBMS_LOB.SUBSTR(FIELD_005, 100, 1), ''^[+-]?\\d+(\\.\\d+)?$'')"}
+                    {"fieldName": "FIELD_003", "validation":"DBMS_LOB.GETLENGTH(STATIC_FIELD_NAME) < 20"}, 
+                    {"fieldName": "FIELD_005", "validation":"REGEXP_LIKE(DBMS_LOB.SUBSTR(STATIC_FIELD_NAME, 100, 1), ''^[+-]?\\d+(\\.\\d+)?$'')"}
                 ],
             "uniqueIdentifier":"FIELD_001"
             }', 
@@ -31,7 +31,7 @@ BEGIN
                     {"fieldName":"FIELD_002","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
                     {"fieldName":"FIELD_003","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
                     {"fieldName":"FIELD_004","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
-                    {"fieldName":"FIELD_005","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"}
+                    {"fieldName":"FIELD_005","transformation":"TRIM(STATIC_FIELD_NAME)"}
                 ],
             "uniqueIdentifier":"FIELD_001"
             }', 
