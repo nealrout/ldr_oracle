@@ -22,7 +22,7 @@ DECLARE
     -- Ordered list of steps
     TYPE StepList IS TABLE OF VARCHAR2(50);
 --    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE');
-    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS');
+    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE');
 
     v_start BOOLEAN := FALSE; -- Flag to start execution
     v_source_table VARCHAR2(250);

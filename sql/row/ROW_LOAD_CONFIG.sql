@@ -4,7 +4,8 @@ BEGIN
             '{"validations":
                 [
                     {"fieldName": "FIELD_003", "validation":"DBMS_LOB.GETLENGTH(STATIC_FIELD_NAME) < 20"}, 
-                    {"fieldName": "FIELD_005", "validation":"REGEXP_LIKE(DBMS_LOB.SUBSTR(STATIC_FIELD_NAME, 100, 1), ''^[+-]?\\d+(\\.\\d+)?$'')"}
+                    {"fieldName": "FIELD_005", "validation":"REGEXP_LIKE(DBMS_LOB.SUBSTR(STATIC_FIELD_NAME, 100, 1), ''^[+-]?\\d+(\\.\\d+)?$'')"},
+                    {"fieldName": "FIELD_007", "validation":"REGEXP_LIKE(DBMS_LOB.SUBSTR(STATIC_FIELD_NAME, 100, 1), ''^[+-]?\\d+(\\.\\d+)?$'')"}
                 ],
             "uniqueIdentifier":"FIELD_001"
             }', 
@@ -18,7 +19,9 @@ BEGIN
                     {"srcField":"FIELD_002","tgtField":"FIELD_002"},
                     {"srcField":"FIELD_003","tgtField":"FIELD_003"},
                     {"srcField":"FIELD_004","tgtField":"FIELD_004"},
-                    {"srcField":"FIELD_005","tgtField":"FIELD_005"}
+                    {"srcField":"FIELD_005","tgtField":"FIELD_005"},
+                    {"srcField":"FIELD_007","tgtField":"FIELD_007"},
+                    {"srcField":"FIELD_007","tgtField":"FIELD_008"}
                 ],
             "uniqueIdentifier":"FIELD_001"
             }', 
@@ -37,4 +40,5 @@ BEGIN
             }', 
             SYSTIMESTAMP);
     COMMIT;
+
 END;
