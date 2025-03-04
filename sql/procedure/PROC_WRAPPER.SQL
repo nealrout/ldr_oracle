@@ -21,7 +21,7 @@ DECLARE
     v_procedures ProcMap;
     -- Ordered list of steps
     TYPE StepList IS TABLE OF VARCHAR2(50);
---    v_steps StepList := StepList('VALIDATE', 'PROCESS_MAPPED', 'PROCESS_NON_MAPPED', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE');
+--    v_steps StepList := StepList('VALIDATE', 'PROCESS_MAPPED', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE');
     v_steps StepList := StepList('VALIDATE', 'PROCESS_MAPPED');
 
     v_start BOOLEAN := FALSE; -- Flag to start execution
@@ -142,7 +142,6 @@ BEGIN
     -- Initialize procedure mapping
     v_procedures('VALIDATE') := 'VALIDATE_AND_INSERT_ERRORS';
     v_procedures('PROCESS_MAPPED') := 'PROCESS_MAPPED_FIELDS';
-    v_procedures('PROCESS_NON_MAPPED') := 'PROCESS_NON_MAPPED_FIELDS';
     v_procedures('TRANSFORM_INLINE') := 'TRANSFORM_INLINE';
     v_procedures('TRANSFORM_AGGREGATE') := 'TRANSFORM_AGGREGATE';
 

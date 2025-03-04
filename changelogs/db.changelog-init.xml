@@ -63,13 +63,13 @@
         <sqlFile path="sql/row/ROW_LOAD_CONFIG.sql" splitStatements="false"/>
     </changeSet>
 
-    <changeSet id="ROW_LOAD_LOG" author="neal" runAlways="true" context="init">
+    <!-- <changeSet id="ROW_LOAD_LOG" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/ROW_LOAD_LOG.sql" splitStatements="false"/>
     </changeSet>
 
     <changeSet id="ROW_LOAD_LOG_DETAIL" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/ROW_LOAD_LOG_DETAIL.sql" splitStatements="false"/>
-    </changeSet>
+    </changeSet> -->
 
     <changeSet id="ROW_STG_ACCOUNT" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/ROW_STG_ACCOUNT.sql" splitStatements="false"/>
