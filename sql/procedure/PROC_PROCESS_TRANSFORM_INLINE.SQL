@@ -105,6 +105,12 @@ BEGIN
         END;
     END LOOP;
 
+    -- Ensure the unique identifier is included in the INSERT statement
+    IF INSTR(v_insert_columns, v_unique_identifier) = 0 THEN
+        v_insert_columns := v_insert_columns || v_unique_identifier || ', ';
+        v_insert_values := v_insert_values || 'source.' || v_unique_identifier || ', ';
+    END IF;
+
     -- Fix trailing commas
     v_update_columns := RTRIM(v_update_columns, ', ');  
     v_insert_columns := RTRIM(v_insert_columns, ', ');  
