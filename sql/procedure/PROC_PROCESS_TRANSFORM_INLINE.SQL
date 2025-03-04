@@ -1,4 +1,4 @@
-CREATE OR REPLACE PROCEDURE PROCESS_MAPPED_FIELDS (
+CREATE OR REPLACE PROCEDURE PROCESS_TRANSFORM_INLINE (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,
     p_tgt_table IN VARCHAR2,
@@ -12,12 +12,12 @@ IS
     v_unique_identifier VARCHAR2(4000) := NULL;
     v_first_loop BOOLEAN := TRUE;
 BEGIN
-    -- **Step 1: Extract Unique Identifier & Mappings in One Query**
+    -- **Step 1: Extract Unique Identifier and Transformations in One Query**
     FOR rec IN (
         WITH json_data AS (
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
             FROM LOAD_CONFIG
-            WHERE STEP_CODE = 'PROCESS_MAPPED'   
+            WHERE STEP_CODE = 'TRANSFORM_INLINE'   
             AND UPPER(SRC_TABLE) = UPPER(p_src_table)
             AND UPPER(TGT_TABLE) = UPPER(p_tgt_table) 
         ),
@@ -27,41 +27,49 @@ BEGIN
                 j.STEP_CODE,
                 j.SRC_TABLE, 
                 j.TGT_TABLE, 
-                DBMS_LOB.SUBSTR(jt.srcField, 4000, 1) AS srcField, 
-                DBMS_LOB.SUBSTR(jt.tgtField, 4000, 1) AS tgtField,
+                DBMS_LOB.SUBSTR(jt.fieldName, 4000, 1) AS fieldName, 
+                DBMS_LOB.SUBSTR(jt.transformation, 4000, 1) AS transformation,
                 DBMS_LOB.SUBSTR(jt.uniqueIdentifier, 4000, 1) AS uniqueIdentifier
             FROM json_data j,
             JSON_TABLE(j.CONFIG, '$' 
                 COLUMNS (
                     uniqueIdentifier CLOB PATH '$.uniqueIdentifier',
-                    NESTED PATH '$.mappings[*]' 
+                    NESTED PATH '$.transformations[*]' 
                     COLUMNS (
-                        srcField CLOB PATH '$.srcField',
-                        tgtField CLOB PATH '$.tgtField'
+                        fieldName CLOB PATH '$.fieldName',
+                        transformation CLOB PATH '$.transformation'
                     )
                 )
             ) jt
         )
-        SELECT DISTINCT uniqueIdentifier, srcField, tgtField FROM cte_parsed_json
+        SELECT DISTINCT uniqueIdentifier, fieldName, transformation FROM cte_parsed_json
     ) LOOP
-        -- **Initialize Unique Identifier & v_merge_sql Only Once**
+        -- Assign unique identifier **only once** in the first iteration
         IF v_first_loop THEN
             v_unique_identifier := rec.uniqueIdentifier;
             v_first_loop := FALSE;
 
+            -- **Initialize v_merge_sql only once**
             v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING ' || p_src_table || ' source ON (' ||
                            'DBMS_LOB.SUBSTR(target.' || v_unique_identifier || ', 4000, 1) = ' ||
                            'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1)) WHEN MATCHED THEN UPDATE SET ';
         END IF;
         
-        -- **Exclude Unique Identifier from UPDATE SET**
-        IF rec.tgtField <> v_unique_identifier THEN
-            v_update_columns := v_update_columns || 'target.' || rec.tgtField || ' = source.' || rec.srcField || ', ';
-        END IF;
+        -- **Replace "STATIC_FIELD_NAME" with actual column name**
+        DECLARE
+            v_actual_transformation VARCHAR2(4000);
+        BEGIN
+            v_actual_transformation := REPLACE(rec.transformation, 'STATIC_FIELD_NAME', 'source.' || rec.fieldName);
 
-        -- **Ensure Fields Are Included in INSERT**
-        v_insert_columns := v_insert_columns || rec.tgtField || ', ';
-        v_insert_values := v_insert_values || 'source.' || rec.srcField || ', ';
+            -- **Exclude unique identifier from UPDATE SET**
+            IF rec.fieldName <> v_unique_identifier THEN
+                v_update_columns := v_update_columns || 'target.' || rec.fieldName || ' = ' || v_actual_transformation || ', ';
+            END IF;
+
+            -- **Ensure field is included in INSERT**
+            v_insert_columns := v_insert_columns || rec.fieldName || ', ';
+            v_insert_values := v_insert_values || v_actual_transformation || ', ';
+        END;
     END LOOP;
 
     -- **Ensure Unique Identifier is Included in INSERT Statement**
@@ -70,7 +78,7 @@ BEGIN
         v_insert_values := v_insert_values || 'source.' || v_unique_identifier || ', ';
     END IF;
 
-    -- **Fix Trailing Commas**
+    -- **Fix trailing commas**
     v_update_columns := RTRIM(v_update_columns, ', ');  
     v_insert_columns := RTRIM(v_insert_columns, ', ');  
     v_insert_values := RTRIM(v_insert_values, ', ');
@@ -83,14 +91,6 @@ BEGIN
     END IF;
 
     v_merge_sql := v_merge_sql || ' WHEN NOT MATCHED THEN INSERT (' || v_insert_columns || ') VALUES (' || v_insert_values || ')';
-
-    -- **Append the WHERE NOT EXISTS condition dynamically**
-    v_merge_sql := v_merge_sql || ' WHERE NOT EXISTS (' ||
-                   'SELECT 1 FROM ERR_VALIDATION EV ' ||
-                   'WHERE EV.LOAD_LOG_ID = ' || p_load_log_id || 
-                   ' AND EV.UNIQUE_IDENTIFIER = ''' || v_unique_identifier || '''' ||
-                   ' AND DBMS_LOB.SUBSTR(EV.UNIQUE_IDENTIFIER_VALUE, 4000, 1) = ' ||
-                   'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1))';
 
     -- **Debugging: Print Final SQL**
     DBMS_OUTPUT.PUT_LINE('SQL: ' || v_merge_sql);
@@ -108,4 +108,4 @@ BEGIN
 EXCEPTION
     WHEN OTHERS THEN
         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
-END PROCESS_MAPPED_FIELDS;
+END PROCESS_TRANSFORM_INLINE;
