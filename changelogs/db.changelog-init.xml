@@ -10,7 +10,7 @@
     <changeSet id="FK_DROP" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/FK_DROP.sql" splitStatements="false"/>
     </changeSet>
-<!--   _________________________TABLES_________________________  -->
+<!--   _________________________TABLES LOAD_________________________  -->
    <changeSet id="TABLE_LOAD_STATUS" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/table/TABLE_LOAD_STATUS.sql" splitStatements="false"/>
     </changeSet>
@@ -30,7 +30,7 @@
     <changeSet id="TABLE_LOAD_CONFIG" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/table/TABLE_LOAD_CONFIG.sql" splitStatements="false"/>
     </changeSet>
-
+<!--   _________________________TABLES STG/LDR/ERR_________________________  -->
     <changeSet id="TABLE_STG_INPUT" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/table/TABLE_STG_INPUT.sql" splitStatements="false"/>
     </changeSet>
@@ -50,6 +50,37 @@
     <changeSet id="TABLE_LDR" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/table/TABLE_LDR.sql" splitStatements="false"/>
     </changeSet>
+<!--   _________________________TABLES OUT_________________________  -->
+    <changeSet id="TABLE_OUT_ACCOUNT" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_OUT_ACCOUNT.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="TABLE_OUT_FACILITY" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_OUT_FACILITY.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="TABLE_OUT_ASSET" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_OUT_ASSET.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="TABLE_OUT_SERVICE" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_OUT_SERVICE.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="TABLE_OUT_ASSET_STATUS" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_OUT_ASSET_STATUS.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="TABLE_OUT_SERVICE_STATUS" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/table/TABLE_OUT_SERVICE_STATUS.sql" splitStatements="false"/>
+    </changeSet>
+
+<!--   _________________________VIEWS_________________________  -->
+    
+    <!-- <changeSet id="VIEW_STG_TRANSFORM" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/view/VIEW_STG_TRANSFORM.sql" splitStatements="false"/>
+    </changeSet> -->
+
 <!--   _________________________ROWS_________________________  -->
     <changeSet id="ROW_LOAD_STATUS" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/ROW_LOAD_STATUS.sql" splitStatements="false"/>
@@ -74,6 +105,10 @@
     <changeSet id="ROW_STG_ACCOUNT" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/ROW_STG_ACCOUNT.sql" splitStatements="false"/>
     </changeSet>
+
+    <changeSet id="ROW_STG_FACILITY" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/row/ROW_STG_FACILITY.sql" splitStatements="false"/>
+    </changeSet>
 <!--   _________________________FK_ADD_________________________  -->
     <changeSet id="FK_ADD" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/FK_ADD.sql" splitStatements="false"/>
@@ -93,177 +128,12 @@
         <sqlFile path="sql/procedure/PROC_PROCESS_MAPPED_FIELDS.sql" splitStatements="false"/>
     </changeSet>
 
-    <!-- <changeSet id="fk_drop" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/fk_drop.sql" splitStatements="false"/>
+    <changeSet id="PROC_PROCESS_TRANSFORM_INLINE" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/procedure/PROC_PROCESS_TRANSFORM_INLINE.sql" splitStatements="false"/>
     </changeSet>
 
-    <changeSet id="table_log" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_log.sql" splitStatements="false"/>
+    <changeSet id="PROC_PROCESS_TRANSFORM_AGGREGATE" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/procedure/PROC_PROCESS_TRANSFORM_AGGREGATE.sql" splitStatements="false"/>
     </changeSet>
-
-    <changeSet id="table_asset_status" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_asset_status.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="table_service_status" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_service_status.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="table_index_status" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_index_status.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="table_account" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_account.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="table_facility" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_facility.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="table_userfacility" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_userfacility.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="table_asset" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_asset.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="table_service" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_service.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="table_index_override" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_index_override.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="table_index_log" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_index_log.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="table_event_notification_buffer" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_event_notification_buffer.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="table_temp" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/table/table_temp.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="row_asset_status" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/row/row_asset_status.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="row_service_status" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/row/row_service_status.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="row_index_status" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/row/row_index_status.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="row_account" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/row/row_account.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="row_facility" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/row/row_facility.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="row_asset" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/row/row_asset.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="row_service" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/row/row_service.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="row_userfacility" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/row/row_userfacility.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="fk_add" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/fk_add.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="func_util" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/function/func_util.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="type_user" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/type/type_user.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="type_account" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/type/type_account.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="type_facility" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/type/type_facility.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="type_asset" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/type/type_asset.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="type_service" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/type/type_service.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="type_userfacility" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/type/type_userfacility.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="type_event_notification_buffer" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/type/type_event_notification_buffer.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="type_index_override" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/type/type_index_override.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="func_log" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/function/func_log.sql" splitStatements="false"/>
-    </changeSet>
-
-    <changeSet id="func_user" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/function/func_user.sql" splitStatements="true" endDelimiter="/"/>
-    </changeSet>
-
-    <changeSet id="func_account" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/function/func_account.sql" splitStatements="true" endDelimiter="/"/>
-    </changeSet>
-
-    <changeSet id="func_facility" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/function/func_facility.sql" splitStatements="true" endDelimiter="/"/>
-    </changeSet>
-
-    <changeSet id="func_asset" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/function/func_asset.sql" splitStatements="true" endDelimiter="/"/>
-    </changeSet>
-
-    <changeSet id="func_service" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/function/func_service.sql" splitStatements="true" endDelimiter="/"/>
-    </changeSet>
-
-    <changeSet id="func_userfacility" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/function/func_userfacility.sql" splitStatements="true" endDelimiter="/"/>
-    </changeSet>
-
-    <changeSet id="func_event_notification_buffer" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/function/func_event_notification_buffer.sql" splitStatements="true" endDelimiter="/"/>
-    </changeSet>
-
-    <changeSet id="func_index_override" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/function/func_index_override.sql" splitStatements="true" endDelimiter="/"/>
-    </changeSet> -->
-<!--
-    <changeSet id="func_index_log" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/function/func_index_log.sql" splitStatements="false"/>
-    </changeSet>    
-
-    <changeSet id="func_integration_testing" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/function/func_integration_testing.sql" splitStatements="false"/>
-    </changeSet>     -->
-
 
 </databaseChangeLog>

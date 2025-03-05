@@ -17,7 +17,7 @@ BEGIN
         WITH json_data AS (
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
             FROM LOAD_CONFIG
-            WHERE STEP_CODE = 'PROCESS_MAPPED'   
+            WHERE STEP_CODE = 'MAP_FIELDS'   
             AND UPPER(SRC_TABLE) = UPPER(p_src_table)
             AND UPPER(TGT_TABLE) = UPPER(p_tgt_table) 
         ),

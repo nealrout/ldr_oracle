@@ -6,7 +6,7 @@ CREATE OR REPLACE PROCEDURE VALIDATE_AND_INSERT_ERRORS (
 ) AS
     v_sql VARCHAR2(4000);
     v_unique_identifier VARCHAR2(4000);
-    v_unique_identifier_value CLOB;
+    v_unique_identifier_value VARCHAR2(4000); -- FIX: Change from CLOB to VARCHAR2
     v_field_name VARCHAR2(255);
     v_validation VARCHAR2(4000);
     v_cursor SYS_REFCURSOR;
@@ -25,7 +25,9 @@ CREATE OR REPLACE PROCEDURE VALIDATE_AND_INSERT_ERRORS (
 BEGIN
     -- **Step 1: Extract Validation Rules in One Query**
     SELECT DISTINCT 
-        jt.uniqueIdentifier, jt.fieldName, jt.validation
+        DBMS_LOB.SUBSTR(jt.uniqueIdentifier, 4000, 1), 
+        DBMS_LOB.SUBSTR(jt.fieldName, 4000, 1), 
+        DBMS_LOB.SUBSTR(jt.validation, 4000, 1)
     BULK COLLECT INTO v_validations
     FROM LOAD_CONFIG l,
          JSON_TABLE(l.CONFIG, '$' 
@@ -33,8 +35,8 @@ BEGIN
             uniqueIdentifier CLOB PATH '$.uniqueIdentifier',
             NESTED PATH '$.validations[*]' 
             COLUMNS (
-                fieldName VARCHAR2(255) PATH '$.fieldName',
-                validation VARCHAR2(4000) PATH '$.validation'
+                fieldName CLOB PATH '$.fieldName',
+                validation CLOB PATH '$.validation'
             )
          )) jt
     WHERE l.STEP_CODE = 'VALIDATE' 
@@ -51,7 +53,8 @@ BEGIN
         v_validation := REPLACE(v_validation, 'STATIC_FIELD_NAME', v_field_name);
 
         -- **Step 3: Construct dynamic SQL to find invalid records**
-        v_sql := 'SELECT ' || v_field_name || ', ' || v_unique_identifier || ', CREATE_TS
+        v_sql := 'SELECT DBMS_LOB.SUBSTR(' || v_field_name || ', 4000, 1), ' || 
+                         'DBMS_LOB.SUBSTR(' || v_unique_identifier || ', 4000, 1), CREATE_TS
                   FROM ' || p_src_table || ' 
                   WHERE NOT (' || v_validation || ')';
 
@@ -80,7 +83,7 @@ BEGIN
 
 EXCEPTION
     WHEN OTHERS THEN
-        -- **Error Handling: Rollback and Raise the Error**
+        -- **Error Handling: Rollback and Log Error**
         ROLLBACK;
         DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
         RAISE;
