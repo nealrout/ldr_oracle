@@ -21,8 +21,8 @@ DECLARE
     v_procedures ProcMap;
     -- Ordered list of steps
     TYPE StepList IS TABLE OF VARCHAR2(50);
---    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE');
-    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE');
+--    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE', 'OUT');
+    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE');
 
     v_start BOOLEAN := FALSE; -- Flag to start execution
     v_source_table VARCHAR2(250);
@@ -207,7 +207,15 @@ BEGIN
             
     UPDATE LOAD_LOG SET STATUS_CODE = v_status_code_success WHERE ID = v_load_log_id;
     DBMS_OUTPUT.PUT_LINE('________________WRAPPER COMPLETED SUCCESSFULLY________________');
+
+END;
+
 /*
+--------------------------------------------------------------------------------
+								ACCOUNT
+--------------------------------------------------------------------------------
+BEGIN
+	
 	VALIDATE_AND_INSERT_ERRORS(
         p_load_log_id => -1,
         p_load_log_detail_id => -1,
@@ -215,40 +223,65 @@ BEGIN
         p_tgt_table => 'ERR_VALIDATION'
     );
 
-begin
+END;
+
+BEGIN
     PROCESS_MAPPED_FIELDS(
-        p_load_log_id => 1,           
-        p_load_log_detail_id => 2,    
+        p_load_log_id => -11,           
+        p_load_log_detail_id => -2,    
         p_src_table => 'STG_INPUT_01',
         p_tgt_table => 'STG_MAP_01'
     );
-end;
-
+END;
+BEGIN
 	PROCESS_TRANSFORM_INLINE(
 		p_load_log_id => -1,           
 		p_load_log_detail_id => -4,    
 		p_src_table => 'STG_MAP_01',
 		p_tgt_table => 'STG_TRANSFORM_01'
 	);
-		
-	
-	TRANSFORM_AGGREGATE(
-        p_load_log_id => -1,           
-        p_load_log_detail_id => -1,    
-        p_src_table => 'STG_INPUT_01',
-        p_tgt_table => 'STG_MAP_01'
-    );
-*/
 END;
 
-/*
-UPDATE LOAD_LOG SET STATUS_CODE = 'FAILED';
-UPDATE LOAD_LOG_DETAIL SET STATUS_CODE = 'FAILED';
-delete from load_log_detail;
-delete from LOAD_LOG;
-SELECT * FROM LOAD_LOG;
-SELECT * FROM LOAD_LOG_DETAIL;
-select * FROM LOAD_STEP;
+--------------------------------------------------------------------------------
+								FACILITY
+--------------------------------------------------------------------------------
+BEGIN
+	
+	VALIDATE_AND_INSERT_ERRORS(
+        p_load_log_id => -1,
+        p_load_log_detail_id => -1,
+        p_src_table => 'STG_INPUT_02',
+        p_tgt_table => 'ERR_VALIDATION'
+    );
+END;
 
-SELECT * FROM LOAD_LOG_DETAIL WHERE LOAD_LOG_ID = -1 AND STATUS_CODE <> 'SUCCESS' ORDER BY START_TS DESC;
+BEGIN
+	
+    PROCESS_MAPPED_FIELDS(
+        p_load_log_id => -11,           
+        p_load_log_detail_id => -2,    
+        p_src_table => 'STG_INPUT_02',
+        p_tgt_table => 'STG_MAP_02'
+    );
+END;
+
+BEGIN
+	
+	PROCESS_TRANSFORM_INLINE(
+		p_load_log_id => -1,           
+		p_load_log_detail_id => -4,    
+		p_src_table => 'STG_MAP_02',
+		p_tgt_table => 'STG_TRANSFORM_02'
+	);
+END;
+
+BEGIN
+	
+	PROCESS_TRANSFORM_AGGREGATE(
+		p_load_log_id => -1,           
+		p_load_log_detail_id => -4,    
+		p_src_table => 'STG_TRANSFORM_02',
+		p_tgt_table => 'STG_TRANSFORM_01'
+	);
+END;
 */
