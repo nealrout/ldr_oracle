@@ -4,8 +4,8 @@ BEGIN
     *                               ACCOUNT LOAD CONFIG
     *************************************************************************************/
 
-    INSERT INTO LOAD_CONFIG(STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
-    VALUES ('VALIDATE', 'STG_INPUT_01', 'ERR_VALIDATION', 
+    INSERT INTO LOAD_CONFIG(ALIAS, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
+    VALUES ('ACCOUNT', 'VALIDATE', 'STG_INPUT_01', 'ERR_VALIDATION', 
             '{"validations":
                 [
                     {"fieldName": "FIELD_003", "validation":"DBMS_LOB.GETLENGTH(STATIC_FIELD_NAME) < 20"}, 
@@ -16,8 +16,8 @@ BEGIN
             }', 
             SYSTIMESTAMP);
 
-    INSERT INTO LOAD_CONFIG(STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
-    VALUES ('MAP_FIELDS', 'STG_INPUT_01', 'STG_MAP_01', 
+    INSERT INTO LOAD_CONFIG(ALIAS, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
+    VALUES ('ACCOUNT', 'MAP_FIELDS', 'STG_INPUT_01', 'STG_MAP_01', 
             '{"mappings":
                 [
                     {"srcField":"FIELD_001","tgtField":"FIELD_001"},
@@ -32,8 +32,8 @@ BEGIN
             }', 
             SYSTIMESTAMP);
 
-    INSERT INTO LOAD_CONFIG(STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
-    VALUES ('TRANSFORM_INLINE', 'STG_MAP_01', 'STG_TRANSFORM_01', 
+    INSERT INTO LOAD_CONFIG(ALIAS, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
+    VALUES ('ACCOUNT', 'TRANSFORM_INLINE', 'STG_MAP_01', 'STG_TRANSFORM_01', 
             '{"transformations":
                 [
                     {"fieldName":"FIELD_002","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
@@ -46,8 +46,8 @@ BEGIN
             SYSTIMESTAMP);
 
     /* THE FIELD THAT IS GROUPED BY WILL BE USED TO MATCH THE UNIQUEIDENTIFIER WHEN UPDATING */
-    INSERT INTO LOAD_CONFIG(STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
-    VALUES ('TRANSFORM_AGGREGATE', 'STG_TRANSFORM_02', 'STG_TRANSFORM_01', 
+    INSERT INTO LOAD_CONFIG(ALIAS, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
+    VALUES ('ACCOUNT', 'TRANSFORM_AGGREGATE', 'STG_TRANSFORM_02', 'STG_TRANSFORM_01', 
             '{"transformations":
                 [
                     {"fieldName":"FIELD_006"
@@ -64,8 +64,8 @@ BEGIN
     *                               FACILITY LOAD CONFIG
     *************************************************************************************/
 
-    INSERT INTO LOAD_CONFIG(STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
-    VALUES ('MAP_FIELDS', 'STG_INPUT_02', 'STG_MAP_02', 
+    INSERT INTO LOAD_CONFIG(ALIAS, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
+    VALUES ('FACILITY', 'MAP_FIELDS', 'STG_INPUT_02', 'STG_MAP_02', 
             '{"mappings":
                 [
                     {"srcField":"FIELD_001","tgtField":"FIELD_001"},
@@ -78,8 +78,8 @@ BEGIN
             }', 
             SYSTIMESTAMP);
 
-    INSERT INTO LOAD_CONFIG(STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
-    VALUES ('TRANSFORM_INLINE', 'STG_MAP_02', 'STG_TRANSFORM_02', 
+    INSERT INTO LOAD_CONFIG(ALIAS, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
+    VALUES ('FACILITY', 'TRANSFORM_INLINE', 'STG_MAP_02', 'STG_TRANSFORM_02', 
             '{"transformations":
                 [
                     {"fieldName":"FIELD_002","transformation":"TRIM(STATIC_FIELD_NAME)"},
