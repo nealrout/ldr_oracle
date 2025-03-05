@@ -63,6 +63,7 @@ BEGIN
 
             -- **Exclude unique identifier from UPDATE SET**
             IF rec.fieldName <> v_unique_identifier THEN
+            	-- DBMS_OUTPUT.PUT_LINE('rec.fieldName ' || rec.fieldName || ', v_unique_identifier ' || v_unique_identifier);
                 v_update_columns := v_update_columns || 'target.' || rec.fieldName || ' = ' || v_actual_transformation || ', ';
             END IF;
 
@@ -75,8 +76,13 @@ BEGIN
     -- **Ensure Unique Identifier is Included in INSERT Statement**
     IF v_unique_identifier IS NOT NULL AND INSTR(v_insert_columns, v_unique_identifier) = 0 THEN
         v_insert_columns := v_insert_columns || v_unique_identifier || ', ';
+    	v_insert_columns := v_insert_columns || 'UNIQUE_IDENTIFIER' || ', ' ;
         v_insert_values := v_insert_values || 'source.' || v_unique_identifier || ', ';
+    	v_insert_values := v_insert_values || 'source.' || v_unique_identifier || ', ';
     END IF;
+    
+    -- DBMS_OUTPUT.PUT_LINE('v_insert_columns ' || v_insert_columns);
+    -- DBMS_OUTPUT.PUT_LINE('v_insert_values ' || v_insert_values);
 
     -- **Fix trailing commas**
     v_update_columns := RTRIM(v_update_columns, ', ');  
