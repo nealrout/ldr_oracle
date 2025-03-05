@@ -1,8 +1,8 @@
 CREATE OR REPLACE PROCEDURE PROCESS_MERGE_STG_TO_LDR (
-    p_src_table IN VARCHAR2,
-    p_tgt_table IN VARCHAR2,
     p_load_log_id IN NUMBER,
-    p_load_log_detail_id IN NUMBER
+    p_load_log_detail_id IN NUMBER,
+    p_src_table IN VARCHAR2,
+    p_tgt_table IN VARCHAR2
 )
 IS
     v_column_list VARCHAR2(32767);

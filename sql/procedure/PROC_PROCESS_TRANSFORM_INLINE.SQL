@@ -1,8 +1,8 @@
 CREATE OR REPLACE PROCEDURE PROCESS_TRANSFORM_INLINE (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,
-    p_tgt_table IN VARCHAR2,
-    p_src_table IN VARCHAR2
+    p_src_table IN VARCHAR2,
+    p_tgt_table IN VARCHAR2
 )
 IS
     v_merge_sql VARCHAR2(32767);  

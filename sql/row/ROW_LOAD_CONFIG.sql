@@ -74,7 +74,12 @@ BEGIN
             SYSTIMESTAMP);
 
     INSERT INTO LOAD_CONFIG(ALIAS, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
-    VALUES ('ACCOUNT', 'LDR', 'STG_TRANSFORM_01', 'LDR_01', '', SYSTIMESTAMP);
+    VALUES ('ACCOUNT', 'LDR', 'STG_TRANSFORM_01', 'LDR_01', 
+            '{
+                "hashColumns":["FIELD_001","FIELD_002","FIELD_003","FIELD_004","FIELD_005","FIELD_007","FIELD_008","FIELD_009","FIELD_010"]
+            }
+            ', 
+            SYSTIMESTAMP);
 
     /*************************************************************************************
     *                               FACILITY LOAD CONFIG
