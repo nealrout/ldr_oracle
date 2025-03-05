@@ -63,7 +63,7 @@ BEGIN
     VALUES ('ACCOUNT', 'TRANSFORM_AGGREGATE', 'STG_TRANSFORM_02', 'STG_TRANSFORM_01', 
             '{"transformations":
                 [
-                    {"fieldName":"FIELD_006"
+                    {"fieldName":"FIELD_011"
                     ,"transformation":"SELECT ACCOUNT.FIELD_001, COUNT(*) AS FACILITY_COUNT 
                                         FROM STG_TRANSFORM_02 FACILITY
                                         JOIN STG_TRANSFORM_01 ACCOUNT ON FACILITY.FIELD_002 = ACCOUNT.FIELD_001
@@ -72,6 +72,9 @@ BEGIN
             "uniqueIdentifier":"FIELD_001"
             }', 
             SYSTIMESTAMP);
+
+    INSERT INTO LOAD_CONFIG(ALIAS, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
+    VALUES ('ACCOUNT', 'LDR', 'STG_TRANSFORM_01', 'LDR_01', '', SYSTIMESTAMP);
 
     /*************************************************************************************
     *                               FACILITY LOAD CONFIG

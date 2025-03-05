@@ -24,7 +24,7 @@ DECLARE
     -- Ordered list of steps
     TYPE StepList IS TABLE OF VARCHAR2(50);
 --    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE', 'LDR', 'OUT');
-    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE');
+    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE', 'LDR');
 
     v_start BOOLEAN := FALSE; -- Flag to start execution
     v_source_table VARCHAR2(250);
@@ -151,6 +151,7 @@ BEGIN
     v_procedures('MAP_FIELDS') := 'PROCESS_MAPPED_FIELDS';
     v_procedures('TRANSFORM_INLINE') := 'PROCESS_TRANSFORM_INLINE';
     v_procedures('TRANSFORM_AGGREGATE') := 'PROCESS_TRANSFORM_AGGREGATE';
+	v_procedures('LDR') := 'PROCESS_MERGE_STG_TO_LDR';
 
     -- Iterate over steps in order
     FOR i IN 1..v_steps.COUNT LOOP

@@ -140,4 +140,8 @@
         <sqlFile path="sql/procedure/PROC_PROCESS_TRANSFORM_AGGREGATE.sql" splitStatements="false"/>
     </changeSet>
 
+    <changeSet id="PROC_PROCESS_MERGE_STG_TO_LDR" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/procedure/PROC_PROCESS_MERGE_STG_TO_LDR.sql" splitStatements="false"/>
+    </changeSet>
+
 </databaseChangeLog>

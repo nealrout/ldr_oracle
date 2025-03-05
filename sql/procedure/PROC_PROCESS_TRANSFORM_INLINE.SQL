@@ -98,7 +98,6 @@ BEGIN
 
     v_merge_sql := v_merge_sql || ' WHEN NOT MATCHED THEN INSERT (' || v_insert_columns || ') VALUES (' || v_insert_values || ')';
 
-    -- **Debugging: Print Final SQL**
     DBMS_OUTPUT.PUT_LINE('SQL: ' || v_merge_sql);
 
     -- **Update log**
