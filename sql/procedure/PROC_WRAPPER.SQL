@@ -21,7 +21,7 @@ DECLARE
     v_procedures ProcMap;
     -- Ordered list of steps
     TYPE StepList IS TABLE OF VARCHAR2(50);
---    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE', 'OUT');
+--    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE', 'LDR', 'OUT');
     v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE');
 
     v_start BOOLEAN := FALSE; -- Flag to start execution
@@ -210,7 +210,7 @@ BEGIN
 
 END;
 
-/*
+/*		BELOW ARE MANUAL EXECUTIONS OF THE PROCEDURES WITHOUT THE WRAPPER (FOR TESTING)
 --------------------------------------------------------------------------------
 								ACCOUNT
 --------------------------------------------------------------------------------
