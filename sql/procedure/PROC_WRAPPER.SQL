@@ -1,5 +1,7 @@
 
 DECLARE
+	v_table_name VARCHAR2(200);
+    v_sql        VARCHAR2(500);
 	v_count_running NUMBER;
 	v_count_success NUMBER;
 	v_count_failed NUMBER;
@@ -29,6 +31,11 @@ DECLARE
     v_target_table VARCHAR2(250);
 BEGIN
 	DBMS_OUTPUT.PUT_LINE('________________WRAPPER STARING________________');
+
+	-- PRE-TRUNCATE ALL STG TABLES
+	TRUNCATE_TABLES_BY_PREFIX('STG_MAP_');
+	TRUNCATE_TABLES_BY_PREFIX('STG_TRANSFORM_');
+
 	SELECT COUNT(*) INTO v_count_running FROM LOAD_LOG WHERE STATUS_CODE = v_status_code_running;
 	SELECT COUNT(*) INTO v_count_success FROM LOAD_LOG WHERE STATUS_CODE = v_status_code_success;
 	SELECT COUNT(*) INTO v_count_failed FROM LOAD_LOG WHERE STATUS_CODE = v_status_code_failed;

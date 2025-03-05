@@ -120,6 +120,10 @@
 
 
 <!--   _________________________PROCEDURES_________________________  -->
+    <changeSet id="PROC_TRUNCATE_TABLES_BY_PREFIX" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/procedure/PROC_TRUNCATE_TABLES_BY_PREFIX.sql" splitStatements="false"/>
+    </changeSet>
+
     <changeSet id="PROC_VALIDATE_AND_INSERT_ERRORS" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/procedure/PROC_VALIDATE_AND_INSERT_ERRORS.sql" splitStatements="false"/>
     </changeSet>
