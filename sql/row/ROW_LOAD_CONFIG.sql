@@ -30,7 +30,9 @@ BEGIN
                     {"srcField":"FIELD_004","tgtField":"FIELD_004"},
                     {"srcField":"FIELD_005","tgtField":"FIELD_005"},
                     {"srcField":"FIELD_007","tgtField":"FIELD_007"},
-                    {"srcField":"FIELD_007","tgtField":"FIELD_008"}
+                    {"srcField":"FIELD_007","tgtField":"FIELD_008"},
+                    {"srcField":"FIELD_007","tgtField":"FIELD_009"},
+                    {"srcField":"FIELD_007","tgtField":"FIELD_010"}
                 ],
             "uniqueIdentifier":"FIELD_001"
             }', 
@@ -44,7 +46,11 @@ BEGIN
                     {"fieldName":"FIELD_002","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
                     {"fieldName":"FIELD_003","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
                     {"fieldName":"FIELD_004","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
-                    {"fieldName":"FIELD_005","transformation":"TRIM(STATIC_FIELD_NAME)"}
+                    {"fieldName":"FIELD_005","transformation":"TRIM(STATIC_FIELD_NAME)"},
+                    {"fieldName":"FIELD_007","transformation":"TRIM(STATIC_FIELD_NAME)"},
+                    {"fieldName":"FIELD_008","transformation":"REGEXP_SUBSTR(STATIC_FIELD_NAME, ''^[^_]+'')"},
+                    {"fieldName":"FIELD_009","transformation":"REGEXP_SUBSTR(STATIC_FIELD_NAME, ''_([^_]+)_'', 1, 1, NULL, 1)"},
+                    {"fieldName":"FIELD_010","transformation":"REGEXP_SUBSTR(STATIC_FIELD_NAME, ''_([^_]+)$'', 1, 1, NULL, 1)"}
                 ],
             "uniqueIdentifier":"FIELD_001"
             }', 
