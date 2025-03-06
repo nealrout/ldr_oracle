@@ -3,7 +3,7 @@
 ## Description
 This project was created as a way to learn Oracle, and build a tool that can be a fully generic loader.  Currently we have 10 of each input tables, which can be scalled to as many as we need.  These tables have 50 columns of type CLOB, so they can accept any input at all thrown at them.
 
-The LOAD_CONFIG table controls how data moves between the STG_INPUT > ERR_VALIDATION > STG_Map > STG_TRASNFORM > OUT tables.
+The LOAD_CONFIG table controls how data moves between the STG_INPUT > ERR_VALIDATION > STG_Map > STG_TRASNFORM > LDR > OUT tables.
 
 Here are some sample records thus far in my POC
 
