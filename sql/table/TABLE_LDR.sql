@@ -8,7 +8,8 @@ BEGIN
         v_table_name := 'LDR_' || LPAD(i, 2, '0');
 
         -- Check if the table already exists
-        SELECT COUNT(*) INTO v_count FROM all_tables WHERE table_name = UPPER(v_table_name) AND owner = 'DAAS';
+        SELECT COUNT(*) INTO v_count FROM all_tables 
+        WHERE table_name = UPPER(v_table_name) AND owner = 'DAAS';
 
         -- Drop table if it exists
         IF v_count > 0 THEN
@@ -18,12 +19,15 @@ BEGIN
         -- Start building the CREATE TABLE statement
         v_sql := 'CREATE TABLE ' || v_table_name || ' (
                     LOAD_LOG_ID NUMBER NOT NULL,
+                    UNIQUE_IDENTIFIER VARCHAR2(4000),
                     CREATE_TS TIMESTAMP WITH TIME ZONE,
-                    UPDATE_TS TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, ';
-
+                    UPDATE_TS TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, 
+                    PREVIOUS_HASH VARCHAR2(64),
+                    NEW_HASH VARCHAR2(64),
+                    IS_CHANGED NUMBER(1) DEFAULT 1,';
         -- Generate 50 CLOB fields dynamically
         FOR j IN 1..50 LOOP
-            v_sql := v_sql || 'FIELD_' || LPAD(j, 3, '0') || ' CLOB, ';
+            v_sql := v_sql || 'FIELD_' || LPAD(j, 3, '0') || ' VARCHAR2(4000), ';
         END LOOP;
 
         -- Remove the trailing comma and close the statement
@@ -36,4 +40,3 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('Created Table: ' || v_table_name);
     END LOOP;
 END;
-/

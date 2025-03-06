@@ -1,8 +1,8 @@
 CREATE OR REPLACE PROCEDURE PROCESS_TRANSFORM_INLINE (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,
-    p_tgt_table IN VARCHAR2,
-    p_src_table IN VARCHAR2
+    p_src_table IN VARCHAR2,
+    p_tgt_table IN VARCHAR2
 )
 IS
     v_merge_sql VARCHAR2(32767);  
@@ -63,6 +63,7 @@ BEGIN
 
             -- **Exclude unique identifier from UPDATE SET**
             IF rec.fieldName <> v_unique_identifier THEN
+            	-- DBMS_OUTPUT.PUT_LINE('rec.fieldName ' || rec.fieldName || ', v_unique_identifier ' || v_unique_identifier);
                 v_update_columns := v_update_columns || 'target.' || rec.fieldName || ' = ' || v_actual_transformation || ', ';
             END IF;
 
@@ -75,8 +76,13 @@ BEGIN
     -- **Ensure Unique Identifier is Included in INSERT Statement**
     IF v_unique_identifier IS NOT NULL AND INSTR(v_insert_columns, v_unique_identifier) = 0 THEN
         v_insert_columns := v_insert_columns || v_unique_identifier || ', ';
+    	v_insert_columns := v_insert_columns || 'UNIQUE_IDENTIFIER' || ', ' ;
         v_insert_values := v_insert_values || 'source.' || v_unique_identifier || ', ';
+    	v_insert_values := v_insert_values || 'source.' || v_unique_identifier || ', ';
     END IF;
+    
+    -- DBMS_OUTPUT.PUT_LINE('v_insert_columns ' || v_insert_columns);
+    -- DBMS_OUTPUT.PUT_LINE('v_insert_values ' || v_insert_values);
 
     -- **Fix trailing commas**
     v_update_columns := RTRIM(v_update_columns, ', ');  
@@ -92,7 +98,6 @@ BEGIN
 
     v_merge_sql := v_merge_sql || ' WHEN NOT MATCHED THEN INSERT (' || v_insert_columns || ') VALUES (' || v_insert_values || ')';
 
-    -- **Debugging: Print Final SQL**
     DBMS_OUTPUT.PUT_LINE('SQL: ' || v_merge_sql);
 
     -- **Update log**
@@ -100,12 +105,14 @@ BEGIN
 
     -- **Check Length Before Execution**
     IF LENGTH(v_merge_sql) > 32767 THEN
-        DBMS_OUTPUT.PUT_LINE('ERROR: Query too long! Switching to DBMS_SQL.PARSE().');
+        DBMS_OUTPUT.PUT_LINE('ERROR: Query too long! Raising exception.');
+        RAISE NO_DATA_FOUND;
     ELSE
         EXECUTE IMMEDIATE v_merge_sql;
     END IF;
 
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Error occurred in PROCESS_TRANSFORM_INLINE: ' || SQLERRM);
+        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in PROCESS_TRANSFORM_INLINE: ' || SQLERRM);
 END PROCESS_TRANSFORM_INLINE;

@@ -1,18 +1,18 @@
 CREATE OR REPLACE PROCEDURE PROCESS_MAPPED_FIELDS (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,
-    p_tgt_table IN VARCHAR2,
-    p_src_table IN VARCHAR2
+    p_src_table IN VARCHAR2,
+    p_tgt_table IN VARCHAR2
 )
 IS
     v_merge_sql VARCHAR2(32767);  
     v_update_columns VARCHAR2(32767) := '';
-    v_insert_columns VARCHAR2(32767) := 'LOAD_LOG_ID, CREATE_TS, ';
-    v_insert_values VARCHAR2(32767) := p_load_log_id || ', SYSTIMESTAMP, ';
+    v_insert_columns VARCHAR2(32767) := 'LOAD_LOG_ID, UNIQUE_IDENTIFIER, CREATE_TS, ';
+    v_insert_values VARCHAR2(32767) := '';
     v_unique_identifier VARCHAR2(4000) := NULL;
     v_first_loop BOOLEAN := TRUE;
 BEGIN
-    -- **Step 1: Extract Unique Identifier & Mappings in One Query**
+    -- **Extract Unique Identifier & Mappings**
     FOR rec IN (
         WITH json_data AS (
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
@@ -44,14 +44,15 @@ BEGIN
         )
         SELECT DISTINCT uniqueIdentifier, srcField, tgtField FROM cte_parsed_json
     ) LOOP
-        -- **Initialize Unique Identifier & v_merge_sql Only Once**
+        -- **Initialize Unique Identifier & v_merge_sql Once**
         IF v_first_loop THEN
             v_unique_identifier := rec.uniqueIdentifier;
             v_first_loop := FALSE;
 
+            -- **Use target.UNIQUE_IDENTIFIER in the ON condition**
             v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING ' || p_src_table || ' source ON (' ||
-                           'DBMS_LOB.SUBSTR(target.' || v_unique_identifier || ', 4000, 1) = ' ||
-                           'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1)) WHEN MATCHED THEN UPDATE SET ';
+                           'target.UNIQUE_IDENTIFIER = DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1)) ' ||
+                           'WHEN MATCHED THEN UPDATE SET ';
         END IF;
         
         -- **Exclude Unique Identifier from UPDATE SET**
@@ -64,11 +65,11 @@ BEGIN
         v_insert_values := v_insert_values || 'source.' || rec.srcField || ', ';
     END LOOP;
 
-    -- **Ensure Unique Identifier is Included in INSERT Statement**
-    IF v_unique_identifier IS NOT NULL AND INSTR(v_insert_columns, v_unique_identifier) = 0 THEN
-        v_insert_columns := v_insert_columns || v_unique_identifier || ', ';
-        v_insert_values := v_insert_values || 'source.' || v_unique_identifier || ', ';
-    END IF;
+    -- **Ensure Correct Order of INSERT Columns & VALUES**
+    v_insert_values := p_load_log_id || ', ' || -- **LOAD_LOG_ID first**
+                       'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1), ' || -- **UNIQUE_IDENTIFIER second**
+                       'SYSTIMESTAMP, ' || -- **CREATE_TS third**
+                       v_insert_values; -- **All remaining fields**
 
     -- **Fix Trailing Commas**
     v_update_columns := RTRIM(v_update_columns, ', ');  
@@ -88,8 +89,7 @@ BEGIN
     v_merge_sql := v_merge_sql || ' WHERE NOT EXISTS (' ||
                    'SELECT 1 FROM ERR_VALIDATION EV ' ||
                    'WHERE EV.LOAD_LOG_ID = ' || p_load_log_id || 
-                   ' AND EV.UNIQUE_IDENTIFIER = ''' || v_unique_identifier || '''' ||
-                   ' AND DBMS_LOB.SUBSTR(EV.UNIQUE_IDENTIFIER_VALUE, 4000, 1) = ' ||
+                   ' AND EV.UNIQUE_IDENTIFIER_VALUE = ' ||
                    'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1))';
 
     -- **Debugging: Print Final SQL**
@@ -100,12 +100,14 @@ BEGIN
 
     -- **Check Length Before Execution**
     IF LENGTH(v_merge_sql) > 32767 THEN
-        DBMS_OUTPUT.PUT_LINE('ERROR: Query too long! Switching to DBMS_SQL.PARSE().');
+        DBMS_OUTPUT.PUT_LINE('ERROR: Query too long! Raising exception.');
+        RAISE NO_DATA_FOUND;
     ELSE
         EXECUTE IMMEDIATE v_merge_sql;
     END IF;
 
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Error occurred in PROCESS_MAPPED_FIELDS: ' || SQLERRM);
+        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in PROCESS_MAPPED_FIELDS: ' || SQLERRM);
 END PROCESS_MAPPED_FIELDS;

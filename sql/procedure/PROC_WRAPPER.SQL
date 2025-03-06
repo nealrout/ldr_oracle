@@ -1,5 +1,7 @@
-
-DECLARE
+CREATE OR REPLACE PROCEDURE WRAPPER
+IS
+	v_table_name VARCHAR2(200);
+    v_sql        VARCHAR2(500);
 	v_count_running NUMBER;
 	v_count_success NUMBER;
 	v_count_failed NUMBER;
@@ -21,14 +23,19 @@ DECLARE
     v_procedures ProcMap;
     -- Ordered list of steps
     TYPE StepList IS TABLE OF VARCHAR2(50);
---    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE', 'OUT');
-    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE');
+--    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE', 'LDR', 'OUT');
+    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE', 'LDR');
 
     v_start BOOLEAN := FALSE; -- Flag to start execution
     v_source_table VARCHAR2(250);
     v_target_table VARCHAR2(250);
 BEGIN
 	DBMS_OUTPUT.PUT_LINE('________________WRAPPER STARING________________');
+
+	-- PRE-TRUNCATE ALL STG TABLES
+	TRUNCATE_TABLES_BY_PREFIX('STG_MAP_');
+	TRUNCATE_TABLES_BY_PREFIX('STG_TRANSFORM_');
+
 	SELECT COUNT(*) INTO v_count_running FROM LOAD_LOG WHERE STATUS_CODE = v_status_code_running;
 	SELECT COUNT(*) INTO v_count_success FROM LOAD_LOG WHERE STATUS_CODE = v_status_code_success;
 	SELECT COUNT(*) INTO v_count_failed FROM LOAD_LOG WHERE STATUS_CODE = v_status_code_failed;
@@ -144,6 +151,8 @@ BEGIN
     v_procedures('MAP_FIELDS') := 'PROCESS_MAPPED_FIELDS';
     v_procedures('TRANSFORM_INLINE') := 'PROCESS_TRANSFORM_INLINE';
     v_procedures('TRANSFORM_AGGREGATE') := 'PROCESS_TRANSFORM_AGGREGATE';
+	v_procedures('LDR') := 'PROCESS_MERGE_STG_TO_LDR';
+	v_procedures('OUT') := 'PROCESS_OUT';
 
     -- Iterate over steps in order
     FOR i IN 1..v_steps.COUNT LOOP
@@ -208,9 +217,15 @@ BEGIN
     UPDATE LOAD_LOG SET STATUS_CODE = v_status_code_success WHERE ID = v_load_log_id;
     DBMS_OUTPUT.PUT_LINE('________________WRAPPER COMPLETED SUCCESSFULLY________________');
 
-END;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error occurred in WRAPPER: ' || SQLERRM);
+        UPDATE LOAD_LOG SET STATUS_CODE = v_status_code_failed WHERE ID = v_load_log_id;
+        COMMIT;
+        RAISE;
+END WRAPPER;
 
-/*
+/*		BELOW ARE MANUAL EXECUTIONS OF THE PROCEDURES WITHOUT THE WRAPPER (FOR TESTING)
 --------------------------------------------------------------------------------
 								ACCOUNT
 --------------------------------------------------------------------------------

@@ -120,6 +120,10 @@
 
 
 <!--   _________________________PROCEDURES_________________________  -->
+    <changeSet id="PROC_TRUNCATE_TABLES_BY_PREFIX" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/procedure/PROC_TRUNCATE_TABLES_BY_PREFIX.sql" splitStatements="false"/>
+    </changeSet>
+
     <changeSet id="PROC_VALIDATE_AND_INSERT_ERRORS" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/procedure/PROC_VALIDATE_AND_INSERT_ERRORS.sql" splitStatements="false"/>
     </changeSet>
@@ -134,6 +138,14 @@
 
     <changeSet id="PROC_PROCESS_TRANSFORM_AGGREGATE" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/procedure/PROC_PROCESS_TRANSFORM_AGGREGATE.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="PROC_PROCESS_MERGE_STG_TO_LDR" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/procedure/PROC_PROCESS_MERGE_STG_TO_LDR.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="PROC_UPDATE_HASHES" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/procedure/PROC_UPDATE_HASHES.sql" splitStatements="false"/>
     </changeSet>
 
 </databaseChangeLog>

@@ -85,6 +85,6 @@ EXCEPTION
     WHEN OTHERS THEN
         -- **Error Handling: Rollback and Log Error**
         ROLLBACK;
-        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
-        RAISE;
+        DBMS_OUTPUT.PUT_LINE('Error occurred in VALIDATE_AND_INSERT_ERRORS: ' || SQLERRM);
+        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in VALIDATE_AND_INSERT_ERRORS: ' || SQLERRM);
 END VALIDATE_AND_INSERT_ERRORS;
