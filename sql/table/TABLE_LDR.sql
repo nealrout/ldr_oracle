@@ -25,6 +25,7 @@ BEGIN
                     PREVIOUS_HASH VARCHAR2(64),
                     NEW_HASH VARCHAR2(64),
                     IS_CHANGED NUMBER(1) DEFAULT 1,';
+        
         -- Generate 50 CLOB fields dynamically
         FOR j IN 1..50 LOOP
             v_sql := v_sql || 'FIELD_' || LPAD(j, 3, '0') || ' VARCHAR2(4000), ';
@@ -36,7 +37,11 @@ BEGIN
         -- Execute the CREATE TABLE statement
         EXECUTE IMMEDIATE v_sql;
 
+        -- Create an index on UNIQUE_IDENTIFIER
+        v_sql := 'CREATE INDEX IDX_' || v_table_name || '_UNIQUE_ID ON ' || v_table_name || ' (UNIQUE_IDENTIFIER)';
+        EXECUTE IMMEDIATE v_sql;
+
         -- Print confirmation
-        DBMS_OUTPUT.PUT_LINE('Created Table: ' || v_table_name);
+        DBMS_OUTPUT.PUT_LINE('Created Table: ' || v_table_name || ' with Index on UNIQUE_IDENTIFIER');
     END LOOP;
 END;
