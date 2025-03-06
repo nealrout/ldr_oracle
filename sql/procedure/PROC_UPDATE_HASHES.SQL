@@ -69,5 +69,6 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Hash update completed successfully for ' || p_tgt_table);
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Error occurred in UPDATE_HASHES_LDR: ' || SQLERRM);
+        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in UPDATE_HASHES_LDR: ' || SQLERRM);
 END UPDATE_HASHES_LDR;

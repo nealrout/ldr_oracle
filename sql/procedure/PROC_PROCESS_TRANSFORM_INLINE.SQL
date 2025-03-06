@@ -105,12 +105,14 @@ BEGIN
 
     -- **Check Length Before Execution**
     IF LENGTH(v_merge_sql) > 32767 THEN
-        DBMS_OUTPUT.PUT_LINE('ERROR: Query too long! Switching to DBMS_SQL.PARSE().');
+        DBMS_OUTPUT.PUT_LINE('ERROR: Query too long! Raising exception.');
+        RAISE NO_DATA_FOUND;
     ELSE
         EXECUTE IMMEDIATE v_merge_sql;
     END IF;
 
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Error occurred in PROCESS_TRANSFORM_INLINE: ' || SQLERRM);
+        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in PROCESS_TRANSFORM_INLINE: ' || SQLERRM);
 END PROCESS_TRANSFORM_INLINE;

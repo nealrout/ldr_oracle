@@ -89,5 +89,6 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Merge completed successfully for ' || p_src_table || ' -> ' || p_tgt_table);
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Error occurred in PROCESS_MERGE_STG_TO_LDR: ' || SQLERRM);
+        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in PROCESS_MERGE_STG_TO_LDR: ' || SQLERRM);
 END PROCESS_MERGE_STG_TO_LDR;
