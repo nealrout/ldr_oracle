@@ -1,5 +1,5 @@
-
-DECLARE
+CREATE OR REPLACE PROCEDURE WRAPPER
+IS
 	v_table_name VARCHAR2(200);
     v_sql        VARCHAR2(500);
 	v_count_running NUMBER;
@@ -217,7 +217,13 @@ BEGIN
     UPDATE LOAD_LOG SET STATUS_CODE = v_status_code_success WHERE ID = v_load_log_id;
     DBMS_OUTPUT.PUT_LINE('________________WRAPPER COMPLETED SUCCESSFULLY________________');
 
-END;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error occurred in WRAPPER: ' || SQLERRM);
+        UPDATE LOAD_LOG SET STATUS_CODE = v_status_code_failed WHERE ID = v_load_log_id;
+        COMMIT;
+        RAISE;
+END WRAPPER;
 
 /*		BELOW ARE MANUAL EXECUTIONS OF THE PROCEDURES WITHOUT THE WRAPPER (FOR TESTING)
 --------------------------------------------------------------------------------
