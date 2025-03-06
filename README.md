@@ -59,8 +59,21 @@ To run liquibase migrations:
 
 ## Features
 ## Overview
+__[PROC_WRAPPER.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_WRAPPER.SQL)__ - Wrapper procedure to determine if we need to recover from a previous failure, or start fresh.  Uses LOAD_LOG AND LOAD_LOG_DETAIL  tables to determine this.
 
+__[PROC_VALIDATE_AND_INSERT_ERRORS.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_VALIDATE_AND_INSERT_ERRORS.SQL)__ -  Procedure to run validations in LOAD_CONFIG, and reject those records to ERR_VALIDATION table.
 
+__[PROC_PROCESS_MAPPED_FIELDS.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_PROCESS_MAPPED_FIELDS.SQL)__ - Procedure to map data between STG_INPUT and STG_MAP.  Dynamic merge statement excluding records in ERR_VALIDATION.
+
+__[PROC_TRANSFORM_INLINE.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_TRANSFORM_INLINE.SQL)__ - Procedure to read inline validations from LOAD_CONFIG, apply them, and move data to STG_TRANSFORM.
+
+__[PROC_TRANSFORM_AGGREGATE.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_TRANSFORM_AGGREGATE.SQL)__ - Procedure to read aggregates from LOAD_CONFIG, appy them, and update them to STG_TRASFORM.
+
+__[PROC_UDPATE_HASHES.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_UDPATE_HASHES.SQL)__ - Procedure that hashes the PREVIOUS_HASH and NEW_HASH, then updates IS_CHANGED field.  This is configuration driven by LOAD_CONFIG.
+
+__[PROC_PROCESS_OUT.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_PROCESS_OUT.SQL)__ - Procedure that reads data from LDR where IS_CHANGED = 1, and then maps the fields to the out tables.  You must supply a target type to convert VARCHAR2(4000) from.
+
+## High level
 ![My Project Logo](LDR_ORACLE.png)
 
 ## Contact
