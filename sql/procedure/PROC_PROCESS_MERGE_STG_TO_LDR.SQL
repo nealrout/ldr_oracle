@@ -71,12 +71,20 @@ BEGIN
     -- Add WHERE condition to filter by LOAD_LOG_ID
     v_merge_sql := v_merge_sql || ' WHERE source.LOAD_LOG_ID = ' || p_load_log_id;
 
+    -- Hash PREVIOUS_HASH in LDR table.
+    DBMS_OUTPUT.PUT_LINE('Hashing PREVIOUS_HASH in LDR table');
+    UPDATE_HASHES_LDR (p_tgt_table =>p_tgt_table, p_pre_ldr => 1);
+
     DBMS_OUTPUT.PUT_LINE('SQL: ' || v_merge_sql);
 
     UPDATE LOAD_LOG_DETAIL SET SQL = v_merge_sql WHERE ID = p_load_log_detail_id;
 
     -- Execute the MERGE statement
     EXECUTE IMMEDIATE v_merge_sql;
+
+    -- Hash NEW_HASH in LDR table, and update IS_CHANGED flag
+    DBMS_OUTPUT.PUT_LINE('Hashing NEW_HASH in LDR table and updating IS_CHANGED flag');
+    UPDATE_HASHES_LDR (p_tgt_table =>p_tgt_table, p_pre_ldr => 0);
 
     DBMS_OUTPUT.PUT_LINE('Merge completed successfully for ' || p_src_table || ' -> ' || p_tgt_table);
 EXCEPTION
