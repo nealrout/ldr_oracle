@@ -72,8 +72,8 @@ BEGIN
         v_insert_values := v_insert_values || 'source.' || rec.tgtField || ', ';
     END LOOP;
 
-    -- **Construct Final MERGE Statement**
-    v_merge_sql := RTRIM(v_merge_sql, ', ') || ' FROM ' || p_src_table || ') source ON (' ||
+    -- **Construct Final MERGE Statement with WHERE condition**
+    v_merge_sql := RTRIM(v_merge_sql, ', ') || ' FROM ' || p_src_table || ' WHERE IS_CHANGED = 1) source ON (' ||
                    'target.UNIQUE_IDENTIFIER = source.' || v_unique_identifier || ') ' ||
                    'WHEN MATCHED THEN UPDATE SET ' || RTRIM(v_update_columns, ', ') ||
                    ' WHEN NOT MATCHED THEN INSERT (' || RTRIM(v_insert_columns, ', ') || ') VALUES (' || RTRIM(v_insert_values, ', ') || ')';
@@ -89,6 +89,9 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('ERROR: Query too long! Switching to DBMS_SQL.PARSE().');
     ELSE
         EXECUTE IMMEDIATE v_merge_sql;
+        
+        -- **Update source table to reset IS_CHANGED flag**
+        EXECUTE IMMEDIATE 'UPDATE ' || p_src_table || ' SET IS_CHANGED = 0 WHERE IS_CHANGED = 1';
     END IF;
 
 EXCEPTION
