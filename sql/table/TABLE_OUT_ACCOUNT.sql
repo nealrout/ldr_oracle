@@ -9,9 +9,13 @@ BEGIN
     EXECUTE IMMEDIATE '
         CREATE TABLE account (
             id NUMBER(19,0) GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            account_nbr VARCHAR2(255) not null,
-            account_code VARCHAR2(255) null,
-            account_name VARCHAR2(255) null,
+            account_nbr VARCHAR2(250) not null,
+            account_code VARCHAR2(250) null,
+            account_name VARCHAR2(250) null,
+            country VARCHAR2(250) null,
+            state VARCHAR2(250) null,
+            county_code VARCHAR2(250) null,
+            asset_count NUMBER null,
             create_ts TIMESTAMP WITH TIME ZONE null,
             update_ts TIMESTAMP WITH TIME ZONE DEFAULT SYSTIMESTAMP
         )';

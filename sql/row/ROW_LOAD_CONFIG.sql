@@ -73,10 +73,27 @@ BEGIN
             }', 
             SYSTIMESTAMP);
 
+    /* CONFIGURATION TO DRIVE THE HASH FIELDS ON THE LDR TABLES.  THIS IS HOW WE DETERMINE IF AN "IS_CHANGED" IS FLAGGED */
     INSERT INTO LOAD_CONFIG(ALIAS, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
     VALUES ('ACCOUNT', 'LDR', 'STG_TRANSFORM_01', 'LDR_01', 
             '{
                 "hashColumns":["FIELD_001","FIELD_002","FIELD_003","FIELD_004","FIELD_005","FIELD_007","FIELD_008","FIELD_009","FIELD_010"]
+            }
+            ', 
+            SYSTIMESTAMP);
+
+    INSERT INTO LOAD_CONFIG(ALIAS, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG, CREATE_TS)
+    VALUES ('ACCOUNT', 'OUT', 'LDR_01', 'ACCOUNT', 
+            '{"mappings":
+                [
+                    {"srcField":"FIELD_001","tgtField":"ACCOUNT_NBR", "tgtType":"VARCHAR(250)"},
+                    {"srcField":"FIELD_002","tgtField":"ACCOUNT_CODE", "tgtType":"VARCHAR(250)"},
+                    {"srcField":"FIELD_003","tgtField":"ACCOUNT_NAME", "tgtType":"VARCHAR(250)"},
+                    {"srcField":"FIELD_008","tgtField":"COUNTRY", "tgtType":"VARCHAR(250)"},
+                    {"srcField":"FIELD_009","tgtField":"STATE", "tgtType":"VARCHAR(250)"},
+                    {"srcField":"FIELD_010","tgtField":"COUNTY_CODE", "tgtType":"VARCHAR(250)"},
+                    {"srcField":"FIELD_011","tgtField":"ASSET_COUNT", "tgtType":"NUMBER"}
+                ]
             }
             ', 
             SYSTIMESTAMP);
