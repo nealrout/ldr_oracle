@@ -65,7 +65,7 @@ __[PROC_VALIDATE_AND_INSERT_ERRORS.SQL](https://github.com/nealrout/ldr_oracle/b
 
 __[PROC_PROCESS_MAPPED_FIELDS.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_PROCESS_MAPPED_FIELDS.SQL)__ - Procedure to map data between STG_INPUT and STG_MAP.  Dynamic merge statement excluding records in ERR_VALIDATION.
 
-__[PROC_TRANSFORM_INLINE.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_TRANSFORM_INLINE.SQL)__ - Procedure to read inline validations from LOAD_CONFIG, apply them, and move data to STG_TRANSFORM.
+__[PROC_TRANSFORM_INLINE.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_PROCESS_TRANSFORM_INLINE.SQL)__ - Procedure to read inline validations from LOAD_CONFIG, apply them, and move data to STG_TRANSFORM.
 
 __[PROC_TRANSFORM_AGGREGATE.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_TRANSFORM_AGGREGATE.SQL)__ - Procedure to read aggregates from LOAD_CONFIG, appy them, and update them to STG_TRASFORM.
 
