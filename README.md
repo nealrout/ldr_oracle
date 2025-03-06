@@ -67,9 +67,9 @@ __[PROC_PROCESS_MAPPED_FIELDS.SQL](https://github.com/nealrout/ldr_oracle/blob/d
 
 __[PROC_TRANSFORM_INLINE.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_PROCESS_TRANSFORM_INLINE.SQL)__ - Procedure to read inline validations from LOAD_CONFIG, apply them, and move data to STG_TRANSFORM.
 
-__[PROC_TRANSFORM_AGGREGATE.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_TRANSFORM_AGGREGATE.SQL)__ - Procedure to read aggregates from LOAD_CONFIG, appy them, and update them to STG_TRASFORM.
+__[PROC_TRANSFORM_AGGREGATE.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_PROCESS_TRANSFORM_AGGREGATE.SQL)__ - Procedure to read aggregates from LOAD_CONFIG, appy them, and update them to STG_TRASFORM.
 
-__[PROC_UDPATE_HASHES.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_UDPATE_HASHES.SQL)__ - Procedure that hashes the PREVIOUS_HASH and NEW_HASH, then updates IS_CHANGED field.  This is configuration driven by LOAD_CONFIG.
+__[PROC_UDPATE_HASHES.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_UPDATE_HASHES.SQL)__ - Procedure that hashes the PREVIOUS_HASH and NEW_HASH, then updates IS_CHANGED field.  This is configuration driven by LOAD_CONFIG.
 
 __[PROC_PROCESS_OUT.SQL](https://github.com/nealrout/ldr_oracle/blob/develop/sql/procedure/PROC_PROCESS_OUT.SQL)__ - Procedure that reads data from LDR where IS_CHANGED = 1, and then maps the fields to the out tables.  You must supply a target type to convert VARCHAR2(4000) from.
 
