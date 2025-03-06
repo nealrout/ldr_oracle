@@ -152,6 +152,7 @@ BEGIN
     v_procedures('TRANSFORM_INLINE') := 'PROCESS_TRANSFORM_INLINE';
     v_procedures('TRANSFORM_AGGREGATE') := 'PROCESS_TRANSFORM_AGGREGATE';
 	v_procedures('LDR') := 'PROCESS_MERGE_STG_TO_LDR';
+	v_procedures('OUT') := 'PROCESS_OUT';
 
     -- Iterate over steps in order
     FOR i IN 1..v_steps.COUNT LOOP

@@ -93,7 +93,8 @@ BEGIN
                     {"srcField":"FIELD_009","tgtField":"STATE", "tgtType":"VARCHAR(250)"},
                     {"srcField":"FIELD_010","tgtField":"COUNTY_CODE", "tgtType":"VARCHAR(250)"},
                     {"srcField":"FIELD_011","tgtField":"ASSET_COUNT", "tgtType":"NUMBER"}
-                ]
+                ],
+                "uniqueIdentifier":"ACCOUNT_NBR"
             }
             ', 
             SYSTIMESTAMP);
