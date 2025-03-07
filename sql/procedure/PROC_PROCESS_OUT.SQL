@@ -7,8 +7,8 @@ CREATE OR REPLACE PROCEDURE PROCESS_OUT (
 IS
     v_merge_sql VARCHAR2(32767);  
     v_update_columns VARCHAR2(32767) := '';
-    v_insert_columns VARCHAR2(32767) := 'LOAD_LOG_ID, UNIQUE_IDENTIFIER, CREATE_TS, ';
-    v_insert_values VARCHAR2(32767) := '';
+    v_insert_columns VARCHAR2(32767) := 'CREATE_TS, ';
+    v_insert_values VARCHAR2(32767) := 'SYSTIMESTAMP, ';
     v_unique_identifier VARCHAR2(4000) := NULL;
     v_first_loop BOOLEAN := TRUE;
 BEGIN
@@ -51,8 +51,8 @@ BEGIN
             v_unique_identifier := rec.uniqueIdentifier;
             v_first_loop := FALSE;
 
-            -- **Use target.UNIQUE_IDENTIFIER in the ON condition**
-            v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING (SELECT ';
+            -- **Use target.ACCOUNT_NBR in the ON condition**
+            v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING (SELECT UNIQUE_IDENTIFIER, SYSTIMESTAMP AS CREATE_TS, ';
         END IF;
         
         -- **Ensure Fields Are Included in SELECT Statement (with Casting)**
@@ -74,7 +74,7 @@ BEGIN
 
     -- **Construct Final MERGE Statement with WHERE condition**
     v_merge_sql := RTRIM(v_merge_sql, ', ') || ' FROM ' || p_src_table || ' WHERE IS_CHANGED = 1) source ON (' ||
-                   'target.UNIQUE_IDENTIFIER = source.' || v_unique_identifier || ') ' ||
+                   'source.UNIQUE_IDENTIFIER = target.'|| v_unique_identifier ||') ' ||
                    'WHEN MATCHED THEN UPDATE SET ' || RTRIM(v_update_columns, ', ') ||
                    ' WHEN NOT MATCHED THEN INSERT (' || RTRIM(v_insert_columns, ', ') || ') VALUES (' || RTRIM(v_insert_values, ', ') || ')';
 
