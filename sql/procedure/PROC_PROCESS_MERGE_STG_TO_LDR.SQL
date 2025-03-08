@@ -11,8 +11,13 @@ IS
     v_insert_columns VARCHAR2(32767);
     v_insert_values VARCHAR2(32767);
     v_count NUMBER;
+
+    v_procedure_name VARCHAR2(100);
+    v_error_message VARCHAR2(4000);
+    v_error_stack   VARCHAR2(4000);
 BEGIN
-    -- Check if source table exists
+    v_procedure_name := REGEXP_SUBSTR(DBMS_UTILITY.FORMAT_CALL_STACK, 'procedure ([^ ]+)', 1, 1, NULL, 1);
+
     SELECT COUNT(*) INTO v_count FROM user_tables WHERE table_name = UPPER(p_src_table);
     IF v_count = 0 THEN
         DBMS_OUTPUT.PUT_LINE('Error: Source table ' || p_src_table || ' does not exist.');
@@ -78,10 +83,11 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('SQL: ' || v_merge_sql);
 
     UPDATE LOAD_LOG_DETAIL SET SQL = v_merge_sql WHERE ID = p_load_log_detail_id;
+    COMMIT;
 
     -- Execute the MERGE statement
     EXECUTE IMMEDIATE v_merge_sql;
-
+    COMMIT;
     -- Hash NEW_HASH in LDR table, and update IS_CHANGED flag
     DBMS_OUTPUT.PUT_LINE('Hashing NEW_HASH in LDR table and updating IS_CHANGED flag');
     UPDATE_HASHES_LDR (p_tgt_table =>p_tgt_table, p_pre_ldr => 0);
@@ -89,6 +95,10 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Merge completed successfully for ' || p_src_table || ' -> ' || p_tgt_table);
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error occurred in PROCESS_MERGE_STG_TO_LDR: ' || SQLERRM);
-        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in PROCESS_MERGE_STG_TO_LDR: ' || SQLERRM);
+        v_error_message := SQLERRM;
+        v_error_stack := DBMS_UTILITY.FORMAT_ERROR_BACKTRACE;
+
+        RAISE_APPLICATION_ERROR(-20002, 
+            'An error occurred in ' || v_procedure_name || ': ' || v_error_message || ' | STACK: ' || v_error_stack
+        );
 END PROCESS_MERGE_STG_TO_LDR;

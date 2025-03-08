@@ -15,8 +15,13 @@ IS
 	v_fkSrcField VARCHAR2(4000);
 	v_fkTgtFieldName VARCHAR2(4000);
 	v_fkTgtFieldNameId VARCHAR2(4000);
+
+    v_procedure_name VARCHAR2(100);
+    v_error_message VARCHAR2(4000);
+    v_error_stack   VARCHAR2(4000);
 BEGIN
-    -- **Extract Unique Identifier & Mappings**
+    v_procedure_name := REGEXP_SUBSTR(DBMS_UTILITY.FORMAT_CALL_STACK, 'procedure ([^ ]+)', 1, 1, NULL, 1);
+
     FOR rec IN (
 		WITH json_data AS (
 		    SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
@@ -59,7 +64,7 @@ BEGIN
 		    SELECT DISTINCT uniqueIdentifier, fkTable, fkSrcField, fkTgtFieldName, fkTgtFieldNameId, srcField, tgtField, tgtType 
 		    FROM cte_parsed_json
     ) LOOP
-        -- **Initialize Unique Identifier & v_merge_sql Once**
+
         IF v_first_loop THEN
             v_unique_identifier := rec.uniqueIdentifier;
 			v_fkTable := rec.fkTable;
@@ -68,7 +73,6 @@ BEGIN
 			v_fkTgtFieldNameId := rec.fkTgtFieldNameId;
             v_first_loop := FALSE;
 
-            -- **Use target.ACCOUNT_NBR in the ON condition**
             v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING (SELECT UNIQUE_IDENTIFIER, ';
             
             -- ADD FK FIELD INSERT IF CONFIGURED
@@ -115,11 +119,11 @@ BEGIN
                    'WHEN MATCHED THEN UPDATE SET ' || RTRIM(v_update_columns, ', ') ||
                    ' WHEN NOT MATCHED THEN INSERT (' || RTRIM(v_insert_columns, ', ') || ') VALUES (' || RTRIM(v_insert_values, ', ') || ')';
 
-    -- **Debugging: Print Final SQL**
     DBMS_OUTPUT.PUT_LINE('SQL: ' || v_merge_sql);
 
     -- **Update log**
     UPDATE LOAD_LOG_DETAIL SET SQL = v_merge_sql WHERE ID = p_load_log_detail_id;
+    COMMIT;
 
     -- **Check Length Before Execution**
     IF LENGTH(v_merge_sql) > 32767 THEN
@@ -130,10 +134,15 @@ BEGIN
         
         -- **Update source table to reset IS_CHANGED flag**
         EXECUTE IMMEDIATE 'UPDATE ' || p_src_table || ' SET IS_CHANGED = 0 WHERE IS_CHANGED = 1';
+        COMMIT;
     END IF;
 
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error occurred in PROCESS_OUT: ' || SQLERRM);
-        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in PROCESS_OUT: ' || SQLERRM);
+        v_error_message := SQLERRM;
+        v_error_stack := DBMS_UTILITY.FORMAT_ERROR_BACKTRACE;
+
+        RAISE_APPLICATION_ERROR(-20002, 
+            'An error occurred in ' || v_procedure_name || ': ' || v_error_message || ' | STACK: ' || v_error_stack
+        );
 END PROCESS_OUT;

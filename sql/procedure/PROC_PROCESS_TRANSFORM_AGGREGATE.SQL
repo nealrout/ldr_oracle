@@ -12,7 +12,7 @@ IS
     v_transformation CLOB;
     v_dynamic_query CLOB;
     v_update_stmt CLOB;
-    v_existing_sql CLOB;  -- Holds the existing SQL CLOB content
+    v_existing_sql CLOB; 
 
     TYPE cur_type IS REF CURSOR;
     v_cursor cur_type;
@@ -20,8 +20,13 @@ IS
     v_id_value VARCHAR2(4000);
     v_transformed_value VARCHAR2(4000);
 
+    v_procedure_name VARCHAR2(100);
+    v_error_message VARCHAR2(4000);
+    v_error_stack   VARCHAR2(4000);
+
 BEGIN
-    -- Fetch transformation details from LOAD_CONFIG
+    v_procedure_name := REGEXP_SUBSTR(DBMS_UTILITY.FORMAT_CALL_STACK, 'procedure ([^ ]+)', 1, 1, NULL, 1);
+    
     FOR rec IN (
         WITH json_data AS (
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
@@ -99,13 +104,12 @@ BEGIN
 		    UPDATE LOAD_LOG_DETAIL 
 		    SET SQL = v_existing_sql
 		    WHERE ID = p_load_log_detail_id;
+            COMMIT;
 		
 		    -- Execute the dynamically built UPDATE statement
 		    EXECUTE IMMEDIATE v_update_stmt;
 		
 		END LOOP;
-		
-
 
         CLOSE v_cursor;
         
@@ -115,9 +119,10 @@ BEGIN
 
 EXCEPTION
     WHEN OTHERS THEN
-        IF v_cursor%ISOPEN THEN
-            CLOSE v_cursor;
-        END IF;
-        DBMS_OUTPUT.PUT_LINE('Error occurred in PROCESS_TRANSFORM_AGGREGATE: ' || SQLERRM);
-        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in PROCESS_TRANSFORM_AGGREGATE: ' || SQLERRM);
+        v_error_message := SQLERRM;
+        v_error_stack := DBMS_UTILITY.FORMAT_ERROR_BACKTRACE;
+
+        RAISE_APPLICATION_ERROR(-20002, 
+            'An error occurred in ' || v_procedure_name || ': ' || v_error_message || ' | STACK: ' || v_error_stack
+        );
 END PROCESS_TRANSFORM_AGGREGATE;

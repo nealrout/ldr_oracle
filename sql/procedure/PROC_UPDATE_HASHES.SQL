@@ -8,8 +8,13 @@ IS
     v_compare_sql VARCHAR2(32767);
     v_hash_column VARCHAR2(50);
     v_count NUMBER;
+
+    v_procedure_name VARCHAR2(100);
+    v_error_message VARCHAR2(4000);
+    v_error_stack   VARCHAR2(4000);
 BEGIN
-    -- Validate table existence
+    v_procedure_name := REGEXP_SUBSTR(DBMS_UTILITY.FORMAT_CALL_STACK, 'procedure ([^ ]+)', 1, 1, NULL, 1);
+
     SELECT COUNT(*) INTO v_count FROM user_tables WHERE table_name = UPPER(p_tgt_table);
     IF v_count = 0 THEN
         DBMS_OUTPUT.PUT_LINE('Error: Target table ' || p_tgt_table || ' does not exist.');
@@ -55,6 +60,7 @@ BEGIN
     DBMS_OUTPUT.PUT_LINE('Executing HASH Update: ' || v_update_hash_sql);
     EXECUTE IMMEDIATE v_update_hash_sql;
 
+
     -- Step 2: If updating NEW_HASH, compare with PREVIOUS_HASH and set IS_CHANGED
     IF p_pre_ldr = 0 THEN
         v_compare_sql := 'UPDATE ' || p_tgt_table || ' ' ||
@@ -64,10 +70,14 @@ BEGIN
         DBMS_OUTPUT.PUT_LINE('Executing Hash Comparison: ' || v_compare_sql);
         EXECUTE IMMEDIATE v_compare_sql;
     END IF;
-
+    COMMIT;
     DBMS_OUTPUT.PUT_LINE('Hash update completed successfully for ' || p_tgt_table);
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error occurred in UPDATE_HASHES_LDR: ' || SQLERRM);
-        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in UPDATE_HASHES_LDR: ' || SQLERRM);
+        v_error_message := SQLERRM;
+        v_error_stack := DBMS_UTILITY.FORMAT_ERROR_BACKTRACE;
+
+        RAISE_APPLICATION_ERROR(-20002, 
+            'An error occurred in ' || v_procedure_name || ': ' || v_error_message || ' | STACK: ' || v_error_stack
+        );
 END UPDATE_HASHES_LDR;

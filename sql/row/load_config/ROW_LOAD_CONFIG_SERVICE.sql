@@ -37,8 +37,8 @@ BEGIN
     VALUES ('SERVICE', 'TRANSFORM_INLINE', 'STG_MAP_04', 'STG_TRANSFORM_04', 
             '{"transformations":
                 [
-                    {"fieldName":"FIELD_001","transformation":"TRIM(STATIC_FIELD_NAME)"},
-                    {"fieldName":"FIELD_002","transformation":"TRIM(STATIC_FIELD_NAME)"},
+                    {"fieldName":"FIELD_001","transformation":"UPPER(TRIM(STATIC_FIELD_NAME))"},
+                    {"fieldName":"FIELD_002","transformation":"UPPER(TRIM(STATIC_FIELD_NAME))"},
                     {"fieldName":"FIELD_003","transformation":"TRIM(STATIC_FIELD_NAME)"},
                     {"fieldName":"FIELD_004","transformation":"TRIM(STATIC_FIELD_NAME)"},
                     {"fieldName":"FIELD_005","transformation":"TRIM(STATIC_FIELD_NAME)"}
@@ -75,7 +75,7 @@ BEGIN
             '{"mappings":
                 [
                     {"srcField":"FIELD_002","tgtField":"SERVICE_NBR", "tgtType":"VARCHAR(250)"},
-                    {"srcField":"FIELD_003","tgtField":"SERIVCE_CODE", "tgtType":"VARCHAR(250)"},
+                    {"srcField":"FIELD_003","tgtField":"SERVICE_CODE", "tgtType":"VARCHAR(250)"},
                     {"srcField":"FIELD_004","tgtField":"SERVICE_NAME", "tgtType":"VARCHAR(250)"}
                 ],
                 "uniqueIdentifier":"SERVICE_NBR",

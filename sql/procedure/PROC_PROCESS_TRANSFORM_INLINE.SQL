@@ -11,8 +11,13 @@ IS
     v_insert_values VARCHAR2(32767) := p_load_log_id || ', SYSTIMESTAMP, ';
     v_unique_identifier VARCHAR2(4000) := NULL;
     v_first_loop BOOLEAN := TRUE;
+
+    v_procedure_name VARCHAR2(100);
+    v_error_message VARCHAR2(4000);
+    v_error_stack   VARCHAR2(4000);
 BEGIN
-    -- **Step 1: Extract Unique Identifier and Transformations in One Query**
+    v_procedure_name := REGEXP_SUBSTR(DBMS_UTILITY.FORMAT_CALL_STACK, 'procedure ([^ ]+)', 1, 1, NULL, 1);
+
     FOR rec IN (
         WITH json_data AS (
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
@@ -102,6 +107,7 @@ BEGIN
 
     -- **Update log**
     UPDATE LOAD_LOG_DETAIL SET SQL = v_merge_sql WHERE ID = p_load_log_detail_id;
+    COMMIT;
 
     -- **Check Length Before Execution**
     IF LENGTH(v_merge_sql) > 32767 THEN
@@ -109,10 +115,15 @@ BEGIN
         RAISE NO_DATA_FOUND;
     ELSE
         EXECUTE IMMEDIATE v_merge_sql;
+        COMMIT;
     END IF;
 
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error occurred in PROCESS_TRANSFORM_INLINE: ' || SQLERRM);
-        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in PROCESS_TRANSFORM_INLINE: ' || SQLERRM);
+        v_error_message := SQLERRM;
+        v_error_stack := DBMS_UTILITY.FORMAT_ERROR_BACKTRACE;
+
+        RAISE_APPLICATION_ERROR(-20002, 
+            'An error occurred in ' || v_procedure_name || ': ' || v_error_message || ' | STACK: ' || v_error_stack
+        );
 END PROCESS_TRANSFORM_INLINE;

@@ -165,6 +165,10 @@
         <sqlFile path="sql/procedure/PROC_PROCESS_MERGE_STG_TO_LDR.sql" splitStatements="false"/>
     </changeSet>
 
+    <changeSet id="PROC_PROCESS_OUT" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/procedure/PROC_PROCESS_OUT.sql" splitStatements="false"/>
+    </changeSet>
+
     <changeSet id="PROC_UPDATE_HASHES" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/procedure/PROC_UPDATE_HASHES.sql" splitStatements="false"/>
     </changeSet>

@@ -6,7 +6,7 @@ CREATE OR REPLACE PROCEDURE VALIDATE_AND_INSERT_ERRORS (
 ) AS
     v_sql VARCHAR2(4000);
     v_unique_identifier VARCHAR2(4000);
-    v_unique_identifier_value VARCHAR2(4000); -- FIX: Change from CLOB to VARCHAR2
+    v_unique_identifier_value VARCHAR2(4000);
     v_field_name VARCHAR2(255);
     v_validation VARCHAR2(4000);
     v_cursor SYS_REFCURSOR;
@@ -22,8 +22,13 @@ CREATE OR REPLACE PROCEDURE VALIDATE_AND_INSERT_ERRORS (
     
     v_field_value VARCHAR2(4000);
     v_create_ts TIMESTAMP;
+
+    v_procedure_name VARCHAR2(100);
+    v_error_message VARCHAR2(4000);
+    v_error_stack   VARCHAR2(4000);
 BEGIN
-    -- **Step 1: Extract Validation Rules in One Query**
+    v_procedure_name := REGEXP_SUBSTR(DBMS_UTILITY.FORMAT_CALL_STACK, 'procedure ([^ ]+)', 1, 1, NULL, 1);
+
     SELECT DISTINCT 
         DBMS_LOB.SUBSTR(jt.uniqueIdentifier, 4000, 1), 
         DBMS_LOB.SUBSTR(jt.fieldName, 4000, 1), 
@@ -83,8 +88,10 @@ BEGIN
 
 EXCEPTION
     WHEN OTHERS THEN
-        -- **Error Handling: Rollback and Log Error**
-        ROLLBACK;
-        DBMS_OUTPUT.PUT_LINE('Error occurred in VALIDATE_AND_INSERT_ERRORS: ' || SQLERRM);
-        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in VALIDATE_AND_INSERT_ERRORS: ' || SQLERRM);
+        v_error_message := SQLERRM;
+        v_error_stack := DBMS_UTILITY.FORMAT_ERROR_BACKTRACE;
+
+        RAISE_APPLICATION_ERROR(-20002, 
+            'An error occurred in ' || v_procedure_name || ': ' || v_error_message || ' | STACK: ' || v_error_stack
+        );
 END VALIDATE_AND_INSERT_ERRORS;

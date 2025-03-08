@@ -35,8 +35,8 @@ BEGIN
     VALUES ('ASSET', 'TRANSFORM_INLINE', 'STG_MAP_03', 'STG_TRANSFORM_03', 
             '{"transformations":
                 [
-                    {"fieldName":"FIELD_001","transformation":"TRIM(STATIC_FIELD_NAME)"},
-                    {"fieldName":"FIELD_002","transformation":"TRIM(STATIC_FIELD_NAME)"},
+                    {"fieldName":"FIELD_001","transformation":"UPPER(TRIM(STATIC_FIELD_NAME))"},
+                    {"fieldName":"FIELD_002","transformation":"UPPER(TRIM(STATIC_FIELD_NAME))"},
                     {"fieldName":"FIELD_003","transformation":"TRIM(STATIC_FIELD_NAME)"},
                     {"fieldName":"FIELD_004","transformation":"TRIM(STATIC_FIELD_NAME)"},
                     {"fieldName":"FIELD_005","transformation":"TRIM(STATIC_FIELD_NAME)"}
