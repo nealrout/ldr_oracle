@@ -11,48 +11,73 @@ IS
     v_insert_values VARCHAR2(32767) := 'SYSTIMESTAMP, ';
     v_unique_identifier VARCHAR2(4000) := NULL;
     v_first_loop BOOLEAN := TRUE;
+	v_fkTable VARCHAR2(4000);
+	v_fkSrcField VARCHAR2(4000);
+	v_fkTgtFieldName VARCHAR2(4000);
+	v_fkTgtFieldNameId VARCHAR2(4000);
 BEGIN
     -- **Extract Unique Identifier & Mappings**
     FOR rec IN (
-        WITH json_data AS (
-            SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
-            FROM LOAD_CONFIG
-            WHERE STEP_CODE = 'OUT'   
-            AND UPPER(SRC_TABLE) = UPPER(p_src_table)
-            AND UPPER(TGT_TABLE) = UPPER(p_tgt_table) 
-        ),
-        cte_parsed_json AS (
-            SELECT 
-                j.ID, 
-                j.STEP_CODE,
-                j.SRC_TABLE, 
-                j.TGT_TABLE,
-                DBMS_LOB.SUBSTR(jt.uniqueIdentifier, 4000, 1) AS uniqueIdentifier,
-                DBMS_LOB.SUBSTR(jt.srcField, 4000, 1) AS srcField, 
-                DBMS_LOB.SUBSTR(jt.tgtField, 4000, 1) AS tgtField,
-                DBMS_LOB.SUBSTR(jt.tgtType, 4000, 1) AS tgtType
-            FROM json_data j,
-            JSON_TABLE(j.CONFIG, '$' 
-                COLUMNS (
-                    uniqueIdentifier CLOB PATH '$.uniqueIdentifier',
-                    NESTED PATH '$.mappings[*]' 
-                    COLUMNS (
-                        srcField CLOB PATH '$.srcField',
-                        tgtField CLOB PATH '$.tgtField',
-                        tgtType CLOB PATH '$.tgtType'
-                    )
-                )
-            ) jt
-        )
-        SELECT DISTINCT uniqueIdentifier, srcField, tgtField, tgtType FROM cte_parsed_json
+		WITH json_data AS (
+		    SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
+		    FROM LOAD_CONFIG
+		    WHERE STEP_CODE = 'OUT'   
+		    AND UPPER(SRC_TABLE) = UPPER(p_src_table)
+		    AND UPPER(TGT_TABLE) = UPPER(p_tgt_table) 
+		),
+		cte_parsed_json AS (
+		    SELECT 
+		        j.ID, 
+		        j.STEP_CODE,
+		        j.SRC_TABLE, 
+		        j.TGT_TABLE,
+		        DBMS_LOB.SUBSTR(jt.uniqueIdentifier, 4000, 1) AS uniqueIdentifier,
+		        DBMS_LOB.SUBSTR(jt.fkTable, 4000, 1) AS fkTable,
+		        DBMS_LOB.SUBSTR(jt.fkSrcField, 4000, 1) AS fkSrcField,
+		        DBMS_LOB.SUBSTR(jt.fkTgtFieldName, 4000, 1) AS fkTgtFieldName,
+		        DBMS_LOB.SUBSTR(jt.fkTgtFieldNameId, 4000, 1) AS fkTgtFieldNameId,
+		        DBMS_LOB.SUBSTR(jt.srcField, 4000, 1) AS srcField, 
+		        DBMS_LOB.SUBSTR(jt.tgtField, 4000, 1) AS tgtField,
+		        DBMS_LOB.SUBSTR(jt.tgtType, 4000, 1) AS tgtType
+		    FROM json_data j,
+		    JSON_TABLE(j.CONFIG, '$' 
+		        COLUMNS (
+		            uniqueIdentifier CLOB PATH '$.uniqueIdentifier',
+		            fkTable CLOB PATH '$.fkTable',
+		            fkSrcField CLOB PATH '$.fkSrcField',
+		            fkTgtFieldName CLOB PATH '$.fkTgtFieldName',
+		            fkTgtFieldNameId CLOB PATH '$.fkTgtFieldNameId',
+		            NESTED PATH '$.mappings[*]' 
+		            COLUMNS (
+		                srcField CLOB PATH '$.srcField',
+		                tgtField CLOB PATH '$.tgtField',
+		                tgtType CLOB PATH '$.tgtType'
+		                )
+		            )
+		        ) jt
+		    )
+		    SELECT DISTINCT uniqueIdentifier, fkTable, fkSrcField, fkTgtFieldName, fkTgtFieldNameId, srcField, tgtField, tgtType 
+		    FROM cte_parsed_json
     ) LOOP
         -- **Initialize Unique Identifier & v_merge_sql Once**
         IF v_first_loop THEN
             v_unique_identifier := rec.uniqueIdentifier;
+			v_fkTable := rec.fkTable;
+			v_fkSrcField := rec.fkSrcField;
+			v_fkTgtFieldName := rec.fkTgtFieldName;
+			v_fkTgtFieldNameId := rec.fkTgtFieldNameId;
             v_first_loop := FALSE;
 
             -- **Use target.ACCOUNT_NBR in the ON condition**
-            v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING (SELECT UNIQUE_IDENTIFIER, SYSTIMESTAMP AS CREATE_TS, ';
+            v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING (SELECT UNIQUE_IDENTIFIER, ';
+            
+            -- ADD FK FIELD INSERT IF CONFIGURED
+            IF COALESCE(v_fkTable, v_fkSrcField, v_fkTgtFieldName, v_fkTgtFieldNameId) IS NOT NULL THEN
+            	v_merge_sql := v_merge_sql || ' F.ID AS '||  v_fkTgtFieldNameId || ',';
+            	v_insert_columns := v_insert_columns || v_fkTgtFieldNameId || ', ';
+		        v_insert_values := v_insert_values || 'source.' || v_fkTgtFieldNameId || ', ';
+            END IF;
+            
         END IF;
         
         -- **Ensure Fields Are Included in SELECT Statement (with Casting)**
@@ -65,6 +90,11 @@ BEGIN
         -- **Exclude Unique Identifier from UPDATE SET**
         IF rec.tgtField <> v_unique_identifier THEN
             v_update_columns := v_update_columns || 'target.' || rec.tgtField || ' = source.' || rec.tgtField || ', ';
+        ELSE
+        	-- ADD FK FIELD UPDATE IF CONFIGURED
+        	IF COALESCE(v_fkTable, v_fkSrcField, v_fkTgtFieldName, v_fkTgtFieldNameId) IS NOT NULL THEN
+	        	v_update_columns := v_update_columns || 'target.' || v_fkTgtFieldNameId || ' = source.' || v_fkTgtFieldNameId || ', ';
+        	END IF;
         END IF;
 
         -- **Ensure Fields Are Included in INSERT**
@@ -73,7 +103,14 @@ BEGIN
     END LOOP;
 
     -- **Construct Final MERGE Statement with WHERE condition**
-    v_merge_sql := RTRIM(v_merge_sql, ', ') || ' FROM ' || p_src_table || ' WHERE IS_CHANGED = 1) source ON (' ||
+    v_merge_sql := RTRIM(v_merge_sql, ', ') || ' FROM ' || p_src_table || ' L ';
+    
+    -- ONLY JOIN TO FK TABLE IF IT IS CONFIGURED TO DO SO.
+    IF COALESCE(v_fkTable, v_fkSrcField, v_fkTgtFieldName, v_fkTgtFieldNameId) IS NOT NULL THEN
+    	v_merge_sql := v_merge_sql || ' JOIN ' || v_fkTable || ' F ON L.' || v_fkSrcField || '= F.' || v_fkTgtFieldName;
+    END IF;
+    
+    v_merge_sql := v_merge_sql ||' WHERE IS_CHANGED = 1) source ON (' ||
                    'source.UNIQUE_IDENTIFIER = target.'|| v_unique_identifier ||') ' ||
                    'WHEN MATCHED THEN UPDATE SET ' || RTRIM(v_update_columns, ', ') ||
                    ' WHEN NOT MATCHED THEN INSERT (' || RTRIM(v_insert_columns, ', ') || ') VALUES (' || RTRIM(v_insert_values, ', ') || ')';

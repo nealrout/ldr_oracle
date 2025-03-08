@@ -51,7 +51,8 @@ BEGIN
                 "uniqueIdentifier":"FACILITY_NBR",
                 "fkTable":"ACCOUNT",
                 "fkSrcField":"FIELD_002",
-                "fkTgtField":"ACCOUNT_NBR"
+                "fkTgtFieldName":"ACCOUNT_NBR",
+                "fkTgtFieldNameId":"ACCOUNT_ID"
             }
             ', 
             SYSTIMESTAMP);
