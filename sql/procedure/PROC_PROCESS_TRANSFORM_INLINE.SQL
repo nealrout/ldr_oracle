@@ -55,9 +55,9 @@ BEGIN
             v_first_loop := FALSE;
 
             -- **Initialize v_merge_sql only once**
-            v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING ' || p_src_table || ' source ON (' ||
-                           'DBMS_LOB.SUBSTR(target.' || v_unique_identifier || ', 4000, 1) = ' ||
-                           'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1)) WHEN MATCHED THEN UPDATE SET ';
+            v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING ' || p_src_table || ' source '||
+            	'ON (target.UNIQUE_IDENTIFIER = source.UNIQUE_IDENTIFIER) ' ||
+				'WHEN MATCHED THEN UPDATE SET ';
         END IF;
         
         -- **Replace "STATIC_FIELD_NAME" with actual column name**
@@ -66,28 +66,20 @@ BEGIN
         BEGIN
             v_actual_transformation := REPLACE(rec.transformation, 'STATIC_FIELD_NAME', 'source.' || rec.fieldName);
 
-            -- **Exclude unique identifier from UPDATE SET**
-            IF rec.fieldName <> v_unique_identifier THEN
-            	-- DBMS_OUTPUT.PUT_LINE('rec.fieldName ' || rec.fieldName || ', v_unique_identifier ' || v_unique_identifier);
-                v_update_columns := v_update_columns || 'target.' || rec.fieldName || ' = ' || v_actual_transformation || ', ';
-            END IF;
+            v_update_columns := v_update_columns || 'target.' || rec.fieldName || ' = ' || v_actual_transformation || ', ';
 
             -- **Ensure field is included in INSERT**
             v_insert_columns := v_insert_columns || rec.fieldName || ', ';
             v_insert_values := v_insert_values || v_actual_transformation || ', ';
+            
+            -- ADD UNIQUE_IDENTIFIER TO INSERT WITH A TRANSFORMATION IF THERE IS ONE.
+            IF rec.fieldName = v_unique_identifier THEN
+            	v_insert_columns := v_insert_columns || 'UNIQUE_IDENTIFIER' || ', ' ;
+            	v_insert_values := v_insert_values || v_actual_transformation || ', ';
+            END IF;
+            
         END;
     END LOOP;
-
-    -- **Ensure Unique Identifier is Included in INSERT Statement**
-    IF v_unique_identifier IS NOT NULL AND INSTR(v_insert_columns, v_unique_identifier) = 0 THEN
-        v_insert_columns := v_insert_columns || v_unique_identifier || ', ';
-    	v_insert_columns := v_insert_columns || 'UNIQUE_IDENTIFIER' || ', ' ;
-        v_insert_values := v_insert_values || 'source.' || v_unique_identifier || ', ';
-    	v_insert_values := v_insert_values || 'source.' || v_unique_identifier || ', ';
-    END IF;
-    
-    -- DBMS_OUTPUT.PUT_LINE('v_insert_columns ' || v_insert_columns);
-    -- DBMS_OUTPUT.PUT_LINE('v_insert_values ' || v_insert_values);
 
     -- **Fix trailing commas**
     v_update_columns := RTRIM(v_update_columns, ', ');  
