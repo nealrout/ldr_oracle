@@ -88,7 +88,7 @@ BEGIN
     -- **Append the WHERE NOT EXISTS condition dynamically**
     v_merge_sql := v_merge_sql || ' WHERE NOT EXISTS (' ||
                    'SELECT 1 FROM ERR_VALIDATION EV ' ||
-                   'WHERE EV.LOAD_LOG_ID = ' || p_load_log_id || 
+                   'WHERE EV.LOAD_LOG_DETAIL_ID = ' || p_load_log_detail_id || 
                    ' AND EV.UNIQUE_IDENTIFIER_VALUE = ' ||
                    'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1))';
 

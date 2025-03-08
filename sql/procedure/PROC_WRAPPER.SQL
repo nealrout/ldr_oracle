@@ -24,7 +24,7 @@ IS
     -- Ordered list of steps
     TYPE StepList IS TABLE OF VARCHAR2(50);
 --    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE', 'LDR', 'OUT');
-    v_steps StepList := StepList('VALIDATE','MAP_FIELDS');
+    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE', 'LDR', 'OUT');
 
     v_start BOOLEAN := FALSE; -- Flag to start execution
     v_source_table VARCHAR2(250);
@@ -206,14 +206,41 @@ BEGIN
                     UPDATE LOAD_LOG_DETAIL SET STATUS_CODE = v_status_code_success WHERE ID = v_load_log_detail_id;
 		            COMMIT;
                     
-                EXCEPTION
-                	WHEN OTHERS THEN
-                		DBMS_OUTPUT.PUT_LINE('!!!!!!!!!!!!!!!!!Error Occurred!!!!!!!!!!!!!!!!!: ' || SQLERRM);	
-	                	UPDATE LOAD_LOG_DETAIL SET STATUS_CODE = v_status_code_failed WHERE ID = v_load_log_detail_id;
-                		UPDATE LOAD_LOG SET STATUS_CODE = v_status_code_failed WHERE ID = v_load_log_id;
-                		COMMIT;
-                END;
-            END LOOP; -- End cursor loop for the current step
+					EXCEPTION
+					    WHEN OTHERS THEN
+					        DECLARE
+					            v_error_message VARCHAR2(4000);
+								v_error_code    VARCHAR2(4000);
+					            v_error_stack   VARCHAR2(4000);
+					        BEGIN
+					            -- Capture error message and stack trace
+					            v_error_message := SQLERRM;
+								v_error_code := SQLCODE;
+					            v_error_stack := DBMS_UTILITY.FORMAT_ERROR_BACKTRACE;
+					
+					            -- Print the error for debugging
+					            DBMS_OUTPUT.PUT_LINE('!!!!!!!!!!!!!!!!! Error Occurred !!!!!!!!!!!!!!!!!!');
+					            DBMS_OUTPUT.PUT_LINE('SQLCODE: ' || v_error_code);
+					            DBMS_OUTPUT.PUT_LINE('ERROR MESSAGE: ' || v_error_message);
+					            DBMS_OUTPUT.PUT_LINE('STACK TRACE: ' || v_error_stack);
+					            DBMS_OUTPUT.PUT_LINE('!!!!!!!!!!!!!!!!! Error Occurred !!!!!!!!!!!!!!!!!!');
+					
+					            -- Store the error details in log tables
+					            UPDATE LOAD_LOG_DETAIL  
+					            SET STATUS_CODE = v_status_code_failed, EXCEPTION_MSG = v_error_message, EXCEPTION_STACK = v_error_stack, EXCEPTION_CODE = v_error_code
+					            WHERE ID = v_load_log_detail_id;
+					
+					            UPDATE LOAD_LOG 
+					            SET STATUS_CODE = v_status_code_failed, EXCEPTION_MSG = v_error_message, EXCEPTION_STACK = v_error_stack, EXCEPTION_CODE = v_error_code
+					            WHERE ID = v_load_log_id;
+					
+					            COMMIT;
+					
+					            -- Raise application error with full details
+					            RAISE_APPLICATION_ERROR(-20002, 'An error occurred in WRAPPER: ' || v_error_message || ' | STACK: ' || v_error_stack);
+					        END;
+				END;
+            END LOOP; 
             
 
         END IF;
