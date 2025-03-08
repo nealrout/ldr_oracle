@@ -16,7 +16,10 @@ BEGIN
             STATUS_CODE VARCHAR2(255) NOT NULL,
             START_TS TIMESTAMP WITH TIME ZONE,
             END_TS TIMESTAMP WITH TIME ZONE,
-            SQL CLOB
+            SQL CLOB,
+            EXCEPTION_MSG CLOB,
+            EXCEPTION_STACK CLOB,
+            EXCEPTION_CODE VARCHAR2(255)
         )';
 
 END;

@@ -1,3 +1,41 @@
+/*====================================================================================
+    PROCEDURE:   PROCESS_TRANSFORM_AGGREGATE
+    PURPOSE:     This procedure applies aggregate transformations from a source table
+                 to a target table based on transformation rules stored in the 
+                 LOAD_CONFIG table.
+                 
+                 The procedure:
+                 1. Extracts transformation rules from JSON where STEP_CODE = 'TRANSFORM_AGGREGATE'.
+                 2. Dynamically constructs and executes transformation queries.
+                 3. Iterates through transformation results and updates the target table.
+                 4. Logs the executed SQL queries into LOAD_LOG_DETAIL.
+                 5. Ensures proper error handling and rollback in case of failure.
+
+    PARAMETERS:
+    --------------------------------------------------------------------------------
+    | Parameter Name       | Type      | Description                                |
+    --------------------------------------------------------------------------------
+    | p_load_log_id        | NUMBER    | ID of the load log entry                   |
+    | p_load_log_detail_id | NUMBER    | ID of the detailed log entry               |
+    | p_src_table          | VARCHAR2  | Name of the source table (TRANSFORM)       |
+    | p_tgt_table          | VARCHAR2  | Name of the target table (TRANSFORM)       |
+    --------------------------------------------------------------------------------
+
+    EXCEPTION HANDLING:
+        - Captures errors and logs them with SQL error message and stack trace.
+        - Uses RAISE_APPLICATION_ERROR to propagate errors for debugging.
+        - Ensures that the procedure does not leave partial transactions.
+
+    AUTHOR:       [NEAL ROUTSON]
+    CREATED ON:   [2025-03-01]
+    
+    REVISION HISTORY:
+    --------------------------------------------------------------------------------
+    | Date       | Author       | Description of Changes                          |
+    --------------------------------------------------------------------------------
+    | 2025-03-08 | Neal Routson | Initial Version                                 |
+    --------------------------------------------------------------------------------
+====================================================================================*/
 CREATE OR REPLACE PROCEDURE PROCESS_TRANSFORM_AGGREGATE(
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,
@@ -12,7 +50,7 @@ IS
     v_transformation CLOB;
     v_dynamic_query CLOB;
     v_update_stmt CLOB;
-    v_existing_sql CLOB;  -- Holds the existing SQL CLOB content
+    v_existing_sql CLOB; 
 
     TYPE cur_type IS REF CURSOR;
     v_cursor cur_type;
@@ -20,8 +58,13 @@ IS
     v_id_value VARCHAR2(4000);
     v_transformed_value VARCHAR2(4000);
 
+    v_procedure_name VARCHAR2(100);
+    v_error_message VARCHAR2(4000);
+    v_error_stack   VARCHAR2(4000);
+
 BEGIN
-    -- Fetch transformation details from LOAD_CONFIG
+    v_procedure_name := REGEXP_SUBSTR(DBMS_UTILITY.FORMAT_CALL_STACK, 'procedure ([^ ]+)', 1, 1, NULL, 1);
+    
     FOR rec IN (
         WITH json_data AS (
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
@@ -64,7 +107,6 @@ BEGIN
         
         -- Open cursor to execute transformation query dynamically
         v_dynamic_query := v_transformation;
-        DBMS_OUTPUT.PUT_LINE('HERE1');
         DBMS_OUTPUT.PUT_LINE(v_dynamic_query);
         OPEN v_cursor FOR v_dynamic_query;
 
@@ -99,13 +141,12 @@ BEGIN
 		    UPDATE LOAD_LOG_DETAIL 
 		    SET SQL = v_existing_sql
 		    WHERE ID = p_load_log_detail_id;
+            COMMIT;
 		
 		    -- Execute the dynamically built UPDATE statement
 		    EXECUTE IMMEDIATE v_update_stmt;
 		
 		END LOOP;
-		
-
 
         CLOSE v_cursor;
         
@@ -115,9 +156,10 @@ BEGIN
 
 EXCEPTION
     WHEN OTHERS THEN
-        IF v_cursor%ISOPEN THEN
-            CLOSE v_cursor;
-        END IF;
-        DBMS_OUTPUT.PUT_LINE('Error occurred in PROCESS_TRANSFORM_AGGREGATE: ' || SQLERRM);
-        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in PROCESS_TRANSFORM_AGGREGATE: ' || SQLERRM);
+        v_error_message := SQLERRM;
+        v_error_stack := DBMS_UTILITY.FORMAT_ERROR_BACKTRACE;
+
+        RAISE_APPLICATION_ERROR(-20002, 
+            'An error occurred in ' || v_procedure_name || ': ' || v_error_message || ' | STACK: ' || v_error_stack
+        );
 END PROCESS_TRANSFORM_AGGREGATE;

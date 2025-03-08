@@ -11,7 +11,7 @@ BEGIN
                     {"fieldName": "FIELD_001", "validation":"DBMS_LOB.GETLENGTH(STATIC_FIELD_NAME) < 250"}, 
                     {"fieldName": "FIELD_002", "validation":"DBMS_LOB.GETLENGTH(STATIC_FIELD_NAME) < 250"}, 
                     {"fieldName": "FIELD_003", "validation":"DBMS_LOB.GETLENGTH(STATIC_FIELD_NAME) < 250"},
-                    {"fieldName": "FIELD_004", "validation":"DBMS_LOB.GETLENGTH(STATIC_FIELD_NAME) < 250"} 
+                    {"fieldName": "FIELD_004", "validation":"DBMS_LOB.GETLENGTH(STATIC_FIELD_NAME) < 250"}
                 ],
             "uniqueIdentifier":"FIELD_002"
             }', 
@@ -35,8 +35,8 @@ BEGIN
     VALUES ('ASSET', 'TRANSFORM_INLINE', 'STG_MAP_03', 'STG_TRANSFORM_03', 
             '{"transformations":
                 [
-                    {"fieldName":"FIELD_001","transformation":"TRIM(STATIC_FIELD_NAME)"},
-                    {"fieldName":"FIELD_002","transformation":"TRIM(STATIC_FIELD_NAME)"},
+                    {"fieldName":"FIELD_001","transformation":"UPPER(TRIM(STATIC_FIELD_NAME))"},
+                    {"fieldName":"FIELD_002","transformation":"UPPER(TRIM(STATIC_FIELD_NAME))"},
                     {"fieldName":"FIELD_003","transformation":"TRIM(STATIC_FIELD_NAME)"},
                     {"fieldName":"FIELD_004","transformation":"TRIM(STATIC_FIELD_NAME)"},
                     {"fieldName":"FIELD_005","transformation":"TRIM(STATIC_FIELD_NAME)"}
@@ -73,11 +73,15 @@ BEGIN
     VALUES ('ASSET', 'OUT', 'LDR_03', 'ASSET', 
             '{"mappings":
                 [
-                    {"srcField":"FIELD_002","tgtField":"ACCOUNT_CODE", "tgtType":"VARCHAR(250)"},
-                    {"srcField":"FIELD_003","tgtField":"ACCOUNT_NAME", "tgtType":"VARCHAR(250)"},
-                    {"srcField":"FIELD_004","tgtField":"COUNTRY", "tgtType":"VARCHAR(250)"}
+                    {"srcField":"FIELD_002","tgtField":"ASSET_NBR", "tgtType":"VARCHAR(250)"},
+                    {"srcField":"FIELD_003","tgtField":"ASSET_CODE", "tgtType":"VARCHAR(250)"},
+                    {"srcField":"FIELD_004","tgtField":"SYS_ID", "tgtType":"VARCHAR(250)"}
                 ],
-                "uniqueIdentifier":"ASSET_NBR"
+                "uniqueIdentifier":"ASSET_NBR",
+                "fkTable":"FACILITY",
+                "fkSrcField":"FIELD_001",
+                "fkTgtFieldName":"FACILITY_NBR",
+                "fkTgtFieldNameId":"FACILITY_ID"
             }
             ', 
             SYSTIMESTAMP);

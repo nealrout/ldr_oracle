@@ -1,3 +1,43 @@
+/*====================================================================================
+    PROCEDURE:   PROCESS_TRANSFORM_INLINE
+    PURPOSE:     This procedure applies inline transformations from a source table
+                 to a target table based on transformation rules stored in the 
+                 LOAD_CONFIG table.
+                 
+                 The procedure:
+                 1. Extracts transformation rules from JSON where STEP_CODE = 'TRANSFORM_INLINE'.
+                 2. Dynamically constructs a SQL MERGE statement to apply transformations.
+                 3. Updates existing records if a match is found based on UNIQUE_IDENTIFIER.
+                 4. Inserts new records if no match is found.
+                 5. Logs the executed SQL queries into LOAD_LOG_DETAIL.
+                 6. Ensures proper error handling and rollback in case of failure.
+
+    PARAMETERS:
+    --------------------------------------------------------------------------------
+    | Parameter Name       | Type      | Description                                |
+    --------------------------------------------------------------------------------
+    | p_load_log_id        | NUMBER    | ID of the load log entry                   |
+    | p_load_log_detail_id | NUMBER    | ID of the detailed log entry               |
+    | p_src_table          | VARCHAR2  | Name of the source table (STG_MAP)         |
+    | p_tgt_table          | VARCHAR2  | Name of the target table (TRANSFORM)       |
+    --------------------------------------------------------------------------------
+
+    EXCEPTION HANDLING:
+        - Captures errors and logs them with SQL error message and stack trace.
+        - Uses RAISE_APPLICATION_ERROR to propagate errors for debugging.
+        - Ensures that the procedure does not leave partial transactions.
+
+    AUTHOR:       [NEAL ROUTSON]
+    CREATED ON:   [2025-03-01]
+    
+    REVISION HISTORY:
+    --------------------------------------------------------------------------------
+    | Date       | Author       | Description of Changes                           |
+    --------------------------------------------------------------------------------
+    | 2025-03-08 | Neal Routson | Initial Version                                  |
+    --------------------------------------------------------------------------------
+====================================================================================*/
+
 CREATE OR REPLACE PROCEDURE PROCESS_TRANSFORM_INLINE (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,
@@ -11,8 +51,13 @@ IS
     v_insert_values VARCHAR2(32767) := p_load_log_id || ', SYSTIMESTAMP, ';
     v_unique_identifier VARCHAR2(4000) := NULL;
     v_first_loop BOOLEAN := TRUE;
+
+    v_procedure_name VARCHAR2(100);
+    v_error_message VARCHAR2(4000);
+    v_error_stack   VARCHAR2(4000);
 BEGIN
-    -- **Step 1: Extract Unique Identifier and Transformations in One Query**
+    v_procedure_name := REGEXP_SUBSTR(DBMS_UTILITY.FORMAT_CALL_STACK, 'procedure ([^ ]+)', 1, 1, NULL, 1);
+
     FOR rec IN (
         WITH json_data AS (
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
@@ -50,9 +95,9 @@ BEGIN
             v_first_loop := FALSE;
 
             -- **Initialize v_merge_sql only once**
-            v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING ' || p_src_table || ' source ON (' ||
-                           'DBMS_LOB.SUBSTR(target.' || v_unique_identifier || ', 4000, 1) = ' ||
-                           'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1)) WHEN MATCHED THEN UPDATE SET ';
+            v_merge_sql := 'MERGE INTO ' || p_tgt_table || ' target USING ' || p_src_table || ' source '||
+            	'ON (target.UNIQUE_IDENTIFIER = source.UNIQUE_IDENTIFIER) ' ||
+				'WHEN MATCHED THEN UPDATE SET ';
         END IF;
         
         -- **Replace "STATIC_FIELD_NAME" with actual column name**
@@ -61,28 +106,20 @@ BEGIN
         BEGIN
             v_actual_transformation := REPLACE(rec.transformation, 'STATIC_FIELD_NAME', 'source.' || rec.fieldName);
 
-            -- **Exclude unique identifier from UPDATE SET**
-            IF rec.fieldName <> v_unique_identifier THEN
-            	-- DBMS_OUTPUT.PUT_LINE('rec.fieldName ' || rec.fieldName || ', v_unique_identifier ' || v_unique_identifier);
-                v_update_columns := v_update_columns || 'target.' || rec.fieldName || ' = ' || v_actual_transformation || ', ';
-            END IF;
+            v_update_columns := v_update_columns || 'target.' || rec.fieldName || ' = ' || v_actual_transformation || ', ';
 
             -- **Ensure field is included in INSERT**
             v_insert_columns := v_insert_columns || rec.fieldName || ', ';
             v_insert_values := v_insert_values || v_actual_transformation || ', ';
+            
+            -- ADD UNIQUE_IDENTIFIER TO INSERT WITH A TRANSFORMATION IF THERE IS ONE.
+            IF rec.fieldName = v_unique_identifier THEN
+            	v_insert_columns := v_insert_columns || 'UNIQUE_IDENTIFIER' || ', ' ;
+            	v_insert_values := v_insert_values || v_actual_transformation || ', ';
+            END IF;
+            
         END;
     END LOOP;
-
-    -- **Ensure Unique Identifier is Included in INSERT Statement**
-    IF v_unique_identifier IS NOT NULL AND INSTR(v_insert_columns, v_unique_identifier) = 0 THEN
-        v_insert_columns := v_insert_columns || v_unique_identifier || ', ';
-    	v_insert_columns := v_insert_columns || 'UNIQUE_IDENTIFIER' || ', ' ;
-        v_insert_values := v_insert_values || 'source.' || v_unique_identifier || ', ';
-    	v_insert_values := v_insert_values || 'source.' || v_unique_identifier || ', ';
-    END IF;
-    
-    -- DBMS_OUTPUT.PUT_LINE('v_insert_columns ' || v_insert_columns);
-    -- DBMS_OUTPUT.PUT_LINE('v_insert_values ' || v_insert_values);
 
     -- **Fix trailing commas**
     v_update_columns := RTRIM(v_update_columns, ', ');  
@@ -102,6 +139,7 @@ BEGIN
 
     -- **Update log**
     UPDATE LOAD_LOG_DETAIL SET SQL = v_merge_sql WHERE ID = p_load_log_detail_id;
+    COMMIT;
 
     -- **Check Length Before Execution**
     IF LENGTH(v_merge_sql) > 32767 THEN
@@ -109,10 +147,15 @@ BEGIN
         RAISE NO_DATA_FOUND;
     ELSE
         EXECUTE IMMEDIATE v_merge_sql;
+        COMMIT;
     END IF;
 
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error occurred in PROCESS_TRANSFORM_INLINE: ' || SQLERRM);
-        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in PROCESS_TRANSFORM_INLINE: ' || SQLERRM);
+        v_error_message := SQLERRM;
+        v_error_stack := DBMS_UTILITY.FORMAT_ERROR_BACKTRACE;
+
+        RAISE_APPLICATION_ERROR(-20002, 
+            'An error occurred in ' || v_procedure_name || ': ' || v_error_message || ' | STACK: ' || v_error_stack
+        );
 END PROCESS_TRANSFORM_INLINE;

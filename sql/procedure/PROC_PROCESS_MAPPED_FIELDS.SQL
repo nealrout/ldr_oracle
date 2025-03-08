@@ -1,3 +1,41 @@
+/*====================================================================================
+    PROCEDURE:   PROCESS_MAPPED_FIELDS
+    PURPOSE:     This procedure processes and maps fields from a source table to a 
+                 target table based on configuration stored in the LOAD_CONFIG table.
+                 
+                 The procedure:
+                 1. Extracts mapping configurations from JSON data where STEP_CODE = 'MAP_FIELDS'.
+                 2. Dynamically constructs a SQL MERGE statement.
+                 3. Updates existing records or inserts new records into the target table.
+                 4. Ensures that only valid data is processed by checking against ERR_VALIDATION.
+                 5. Logs the generated SQL and handles exceptions gracefully.
+
+    PARAMETERS:
+    --------------------------------------------------------------------------------
+    | Parameter Name       | Type      | Description                                |
+    --------------------------------------------------------------------------------
+    | p_load_log_id        | NUMBER    | ID of the load log entry                   |
+    | p_load_log_detail_id | NUMBER    | ID of the detailed log entry               |
+    | p_src_table          | VARCHAR2  | Name of the source table (STG_INPUT)       |
+    | p_tgt_table          | VARCHAR2  | Name of the target table (STG_MAP)         |
+    --------------------------------------------------------------------------------
+
+    EXCEPTION HANDLING:
+        - Captures errors and logs them with SQL error message and stack trace.
+        - Uses RAISE_APPLICATION_ERROR to propagate errors for debugging.
+        - Ensures that the procedure does not leave partial transactions.
+
+    AUTHOR:       [NEAL ROUTSON]
+    CREATED ON:   [2025-03-01]
+    
+    REVISION HISTORY:
+    --------------------------------------------------------------------------------
+    | Date       | Author       | Description of Changes                          |
+    --------------------------------------------------------------------------------
+    | 2025-03-08 | Neal Routson | Initial Version                                 |
+    --------------------------------------------------------------------------------
+====================================================================================*/
+
 CREATE OR REPLACE PROCEDURE PROCESS_MAPPED_FIELDS (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,
@@ -11,8 +49,13 @@ IS
     v_insert_values VARCHAR2(32767) := '';
     v_unique_identifier VARCHAR2(4000) := NULL;
     v_first_loop BOOLEAN := TRUE;
+
+    v_procedure_name VARCHAR2(100);
+    v_error_message VARCHAR2(4000);
+    v_error_stack   VARCHAR2(4000);
 BEGIN
-    -- **Extract Unique Identifier & Mappings**
+    v_procedure_name := REGEXP_SUBSTR(DBMS_UTILITY.FORMAT_CALL_STACK, 'procedure ([^ ]+)', 1, 1, NULL, 1);
+
     FOR rec IN (
         WITH json_data AS (
             SELECT ID, STEP_CODE, SRC_TABLE, TGT_TABLE, CONFIG 
@@ -44,7 +87,6 @@ BEGIN
         )
         SELECT DISTINCT uniqueIdentifier, srcField, tgtField FROM cte_parsed_json
     ) LOOP
-        -- **Initialize Unique Identifier & v_merge_sql Once**
         IF v_first_loop THEN
             v_unique_identifier := rec.uniqueIdentifier;
             v_first_loop := FALSE;
@@ -88,7 +130,7 @@ BEGIN
     -- **Append the WHERE NOT EXISTS condition dynamically**
     v_merge_sql := v_merge_sql || ' WHERE NOT EXISTS (' ||
                    'SELECT 1 FROM ERR_VALIDATION EV ' ||
-                   'WHERE EV.LOAD_LOG_ID = ' || p_load_log_id || 
+                   'WHERE EV.LOAD_LOG_DETAIL_ID = ' || p_load_log_detail_id || 
                    ' AND EV.UNIQUE_IDENTIFIER_VALUE = ' ||
                    'DBMS_LOB.SUBSTR(source.' || v_unique_identifier || ', 4000, 1))';
 
@@ -97,6 +139,7 @@ BEGIN
 
     -- **Update log**
     UPDATE LOAD_LOG_DETAIL SET SQL = v_merge_sql WHERE ID = p_load_log_detail_id;
+    COMMIT;
 
     -- **Check Length Before Execution**
     IF LENGTH(v_merge_sql) > 32767 THEN
@@ -106,8 +149,14 @@ BEGIN
         EXECUTE IMMEDIATE v_merge_sql;
     END IF;
 
+    COMMIT;
+
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error occurred in PROCESS_MAPPED_FIELDS: ' || SQLERRM);
-        RAISE_APPLICATION_ERROR(-20002, 'An error occurred in PROCESS_MAPPED_FIELDS: ' || SQLERRM);
+        v_error_message := SQLERRM;
+        v_error_stack := DBMS_UTILITY.FORMAT_ERROR_BACKTRACE;
+
+        RAISE_APPLICATION_ERROR(-20002, 
+            'An error occurred in ' || v_procedure_name || ': ' || v_error_message || ' | STACK: ' || v_error_stack
+        );
 END PROCESS_MAPPED_FIELDS;

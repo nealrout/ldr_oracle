@@ -90,6 +90,7 @@
         <sqlFile path="sql/row/ROW_LOAD_STEP.sql" splitStatements="false"/>
     </changeSet>
 
+<!-- *************************CONFIG START***********************************-->
     <changeSet id="ROW_LOAD_CONFIG_ACCOUNT" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/load_config/ROW_LOAD_CONFIG_ACCOUNT.sql" splitStatements="false"/>
     </changeSet>
@@ -98,6 +99,14 @@
         <sqlFile path="sql/row/load_config/ROW_LOAD_CONFIG_FACILITY.sql" splitStatements="false"/>
     </changeSet>
 
+    <changeSet id="ROW_LOAD_CONFIG_ASSET" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/row/load_config/ROW_LOAD_CONFIG_ASSET.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="ROW_LOAD_CONFIG_SERVICE" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/row/load_config/ROW_LOAD_CONFIG_SERVICE.sql" splitStatements="false"/>
+    </changeSet>
+<!-- *************************CONFIG END************************************-->
     <changeSet id="ROW_LOAD_LOG" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/ROW_LOAD_LOG.sql" splitStatements="false"/>
     </changeSet>
@@ -154,6 +163,10 @@
 
     <changeSet id="PROC_PROCESS_MERGE_STG_TO_LDR" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/procedure/PROC_PROCESS_MERGE_STG_TO_LDR.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="PROC_PROCESS_OUT" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/procedure/PROC_PROCESS_OUT.sql" splitStatements="false"/>
     </changeSet>
 
     <changeSet id="PROC_UPDATE_HASHES" author="neal" runAlways="true" context="init">

@@ -43,7 +43,8 @@ BEGIN
     VALUES ('ACCOUNT', 'TRANSFORM_INLINE', 'STG_MAP_01', 'STG_TRANSFORM_01', 
             '{"transformations":
                 [
-                    {"fieldName":"FIELD_002","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
+                    {"fieldName":"FIELD_001","transformation":"UPPER(TRIM(STATIC_FIELD_NAME))"},
+                    {"fieldName":"FIELD_002","transformation":"UPPER(TRIM(STATIC_FIELD_NAME))"},
                     {"fieldName":"FIELD_003","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
                     {"fieldName":"FIELD_004","transformation":"TRANSLATE(LOWER(TRIM(STATIC_FIELD_NAME)),''_'',''-'')"},
                     {"fieldName":"FIELD_005","transformation":"TRIM(STATIC_FIELD_NAME)"},

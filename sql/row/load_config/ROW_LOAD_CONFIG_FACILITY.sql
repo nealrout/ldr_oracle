@@ -21,7 +21,8 @@ BEGIN
     VALUES ('FACILITY', 'TRANSFORM_INLINE', 'STG_MAP_02', 'STG_TRANSFORM_02', 
             '{"transformations":
                 [
-                    {"fieldName":"FIELD_002","transformation":"TRIM(STATIC_FIELD_NAME)"},
+                    {"fieldName":"FIELD_001","transformation":"UPPER(TRIM(STATIC_FIELD_NAME))"},
+                    {"fieldName":"FIELD_002","transformation":"UPPER(TRIM(STATIC_FIELD_NAME))"},
                     {"fieldName":"FIELD_003","transformation":"TRIM(STATIC_FIELD_NAME)"},
                     {"fieldName":"FIELD_004","transformation":"TRIM(STATIC_FIELD_NAME)"},
                     {"fieldName":"FIELD_005","transformation":"TRIM(STATIC_FIELD_NAME)"}
