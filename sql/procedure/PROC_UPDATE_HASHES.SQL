@@ -16,7 +16,6 @@ BEGIN
         RETURN;
     END IF;
 
-	DBMS_OUTPUT.PUT_LINE('HERE');
     -- Retrieve columns used for hashing dynamically
     v_hash_columns := '';
     FOR hash_rec IN (

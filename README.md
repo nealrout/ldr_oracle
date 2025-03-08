@@ -7,7 +7,8 @@ The LOAD_CONFIG table controls how data moves between the STG_INPUT > ERR_VALIDA
 
 Here are some sample records thus far in my POC
 
-[ROW_LOAD_CONFIG](https://github.com/nealrout/ldr_oracle/blob/develop/sql/row/ROW_LOAD_CONFIG.sql) 
+[ROW_LOAD_CONFIG_ACCOUNT](https://github.com/nealrout/ldr_oracle/blob/develop/sql/row/load_config/ROW_LOAD_CONFIG_ACCOUNT.sql)   
+[ROW_LOAD_CONFIG_FACILITY](https://github.com/nealrout/ldr_oracle/blob/develop/sql/row/load_config/ROW_LOAD_CONFIG_FACILITY.sql)   
 
 These configurations currently include validating data, mapping data, in line transformations, and aggregate transformations.  The OUT is still a work in progress, and will be completed shortly.
 

@@ -90,8 +90,12 @@
         <sqlFile path="sql/row/ROW_LOAD_STEP.sql" splitStatements="false"/>
     </changeSet>
 
-    <changeSet id="ROW_LOAD_CONFIG" author="neal" runAlways="true" context="init">
-        <sqlFile path="sql/row/ROW_LOAD_CONFIG.sql" splitStatements="false"/>
+    <changeSet id="ROW_LOAD_CONFIG_ACCOUNT" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/row/load_config/ROW_LOAD_CONFIG_ACCOUNT.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="ROW_LOAD_CONFIG_FACILITY" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/row/load_config/ROW_LOAD_CONFIG_FACILITY.sql" splitStatements="false"/>
     </changeSet>
 
     <changeSet id="ROW_LOAD_LOG" author="neal" runAlways="true" context="init">
@@ -108,6 +112,14 @@
 
     <changeSet id="ROW_STG_FACILITY" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/ROW_STG_FACILITY.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="ROW_STG_ASSET" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/row/ROW_STG_ASSET.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="ROW_STG_SERVICE" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/row/ROW_STG_SERVICE.sql" splitStatements="false"/>
     </changeSet>
 <!--   _________________________FK_ADD_________________________  -->
     <changeSet id="FK_ADD" author="neal" runAlways="true" context="init">
