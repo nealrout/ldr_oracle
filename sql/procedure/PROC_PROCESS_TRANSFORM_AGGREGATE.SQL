@@ -69,7 +69,6 @@ BEGIN
         
         -- Open cursor to execute transformation query dynamically
         v_dynamic_query := v_transformation;
-        DBMS_OUTPUT.PUT_LINE('HERE1');
         DBMS_OUTPUT.PUT_LINE(v_dynamic_query);
         OPEN v_cursor FOR v_dynamic_query;
 
