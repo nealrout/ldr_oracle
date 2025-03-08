@@ -24,7 +24,7 @@ IS
     -- Ordered list of steps
     TYPE StepList IS TABLE OF VARCHAR2(50);
 --    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE', 'LDR', 'OUT');
-    v_steps StepList := StepList('VALIDATE', 'MAP_FIELDS', 'TRANSFORM_INLINE', 'TRANSFORM_AGGREGATE', 'LDR');
+    v_steps StepList := StepList('VALIDATE','MAP_FIELDS');
 
     v_start BOOLEAN := FALSE; -- Flag to start execution
     v_source_table VARCHAR2(250);
@@ -185,11 +185,13 @@ BEGIN
 					RETURNING ID INTO v_load_log_detail_id;
             	END IF;
 
+            	DBMS_OUTPUT.PUT_LINE('****************************************************************************');
                 DBMS_OUTPUT.PUT_LINE('####Executing: ' || v_procedures(v_load_step_code) || 
                                      ' with SRC_TABLE: ' || v_source_table || 
                                      ', TGT_TABLE: ' || v_target_table ||
                 					 ', v_load_log_id: ' || v_load_log_id ||
                 					 ', v_load_log_detail_id: ' || v_load_log_detail_id);
+            	DBMS_OUTPUT.PUT_LINE('****************************************************************************');
 
                 BEGIN
 	                EXECUTE IMMEDIATE 
@@ -200,6 +202,10 @@ BEGIN
 	                        p_tgt_table => :4
 	                    ); END;'
 	                USING v_load_log_id, v_load_log_detail_id, v_source_table, v_target_table;
+                
+                    UPDATE LOAD_LOG_DETAIL SET STATUS_CODE = v_status_code_success WHERE ID = v_load_log_detail_id;
+		            COMMIT;
+                    
                 EXCEPTION
                 	WHEN OTHERS THEN
                 		DBMS_OUTPUT.PUT_LINE('!!!!!!!!!!!!!!!!!Error Occurred!!!!!!!!!!!!!!!!!: ' || SQLERRM);	
@@ -209,8 +215,7 @@ BEGIN
                 END;
             END LOOP; -- End cursor loop for the current step
             
-            UPDATE LOAD_LOG_DETAIL SET STATUS_CODE = v_status_code_success WHERE ID = v_load_log_detail_id;
-            COMMIT;
+
         END IF;
     END LOOP;
             
