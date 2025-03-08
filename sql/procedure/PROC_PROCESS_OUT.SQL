@@ -1,3 +1,42 @@
+/*====================================================================================
+    PROCEDURE:   PROCESS_OUT
+    PURPOSE:     This procedure processes data from a source table and merges it 
+                 into a target table dynamically based on mappings stored in the 
+                 LOAD_CONFIG table.
+                 
+                 The procedure:
+                 1. Extracts mapping configurations from JSON data where STEP_CODE = 'OUT'.
+                 2. Dynamically constructs a SQL MERGE statement.
+                 3. Joins with foreign key tables if necessary.
+                 4. Updates existing records if a match is found based on UNIQUE_IDENTIFIER.
+                 5. Inserts new records if no match is found.
+                 6. Logs the generated SQL and ensures proper exception handling.
+
+    PARAMETERS:
+    --------------------------------------------------------------------------------
+    | Parameter Name       | Type      | Description                               |
+    --------------------------------------------------------------------------------
+    | p_load_log_id        | NUMBER    | ID of the load log entry                  |
+    | p_load_log_detail_id | NUMBER    | ID of the detailed log entry              |
+    | p_src_table          | VARCHAR2  | Name of the source table (STG)            |
+    | p_tgt_table          | VARCHAR2  | Name of the target table (LDR)            |
+    --------------------------------------------------------------------------------
+
+    EXCEPTION HANDLING:
+        - Captures errors and logs them with SQL error message and stack trace.
+        - Uses RAISE_APPLICATION_ERROR to propagate errors for debugging.
+        - Ensures that the procedure does not leave partial transactions.
+
+    AUTHOR:       [NEAL ROUTSON]
+    CREATED ON:   [2025-03-01]
+    
+    REVISION HISTORY:
+    -------------------------------------------------------------------------------
+    | Date       | Author       | Description of Changes                          |
+    -------------------------------------------------------------------------------
+    | 2025-03-08 | Neal Routson | Initial Version                                 |
+    -------------------------------------------------------------------------------
+====================================================================================*/
 CREATE OR REPLACE PROCEDURE PROCESS_OUT (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,

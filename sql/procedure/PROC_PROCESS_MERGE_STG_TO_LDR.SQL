@@ -1,3 +1,42 @@
+/*====================================================================================
+    PROCEDURE:   PROCESS_MERGE_STG_TO_LDR
+    PURPOSE:     This procedure merges data from a staging table (STG) to a loader 
+                 table (LDR) dynamically. It checks for existing records and either 
+                 updates or inserts new records accordingly.
+                 
+                 The procedure:
+                 1. Validates that both source (STG) and target (LDR) tables exist.
+                 2. Dynamically constructs a SQL MERGE statement.
+                 3. Updates existing records if a match is found based on UNIQUE_IDENTIFIER.
+                 4. Inserts new records if no match is found.
+                 5. Uses HASH functions to determine what fiels are IS_CHANGED (deltas).
+                 6. Logs the generated SQL and ensures proper exception handling.
+
+    PARAMETERS:
+    --------------------------------------------------------------------------------
+    | Parameter Name       | Type      | Description                                |
+    --------------------------------------------------------------------------------
+    | p_load_log_id        | NUMBER    | ID of the load log entry                   |
+    | p_load_log_detail_id | NUMBER    | ID of the detailed log entry               |
+    | p_src_table          | VARCHAR2  | Name of the source table (STG_TRANSFORM)   |
+    | p_tgt_table          | VARCHAR2  | Name of the target table (LDR)             |
+    --------------------------------------------------------------------------------
+
+    EXCEPTION HANDLING:
+        - Captures errors and logs them with SQL error message and stack trace.
+        - Uses RAISE_APPLICATION_ERROR to propagate errors for debugging.
+        - Ensures that the procedure does not leave partial transactions.
+
+    AUTHOR:       [NEAL ROUTSON]
+    CREATED ON:   [2025-03-01]
+    
+    REVISION HISTORY:
+    --------------------------------------------------------------------------------
+    | Date       | Author       | Description of Changes                           |
+    --------------------------------------------------------------------------------
+    | 2025-03-08 | Neal Routson | Initial Version                                  |
+    --------------------------------------------------------------------------------
+====================================================================================*/
 CREATE OR REPLACE PROCEDURE PROCESS_MERGE_STG_TO_LDR (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,

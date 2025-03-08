@@ -1,3 +1,41 @@
+/*====================================================================================
+    PROCEDURE:   UPDATE_HASHES_LDR
+    PURPOSE:     This procedure updates hash values for a given target table in the 
+                 loader (LDR) stage. It dynamically determines which columns to hash
+                 and updates either the PREVIOUS_HASH or NEW_HASH column.
+                 
+                 The procedure:
+                 1. Validates that the target table exists.
+                 2. Extracts column names used for hashing from the LOAD_CONFIG table.
+                 3. Computes SHA256 hash values for the selected columns.
+                 4. Updates the appropriate hash column (PREVIOUS_HASH or NEW_HASH).
+                 5. If updating NEW_HASH, compares it with PREVIOUS_HASH and sets IS_CHANGED.
+                 6. Logs SQL executions using DBMS_OUTPUT.
+
+    PARAMETERS:
+    --------------------------------------------------------------------------------
+    | Parameter Name  | Type      | Description                                     |
+    --------------------------------------------------------------------------------
+    | p_tgt_table     | VARCHAR2  | Name of the target table to update hashes for   |
+    | p_pre_ldr       | NUMBER    | Flag (1 = Update PREVIOUS_HASH, 0 = Update NEW_HASH) |
+    --------------------------------------------------------------------------------
+
+    EXCEPTION HANDLING:
+        - If the target table does not exist, logs an error and exits.
+        - Captures errors and logs them with SQL error message and stack trace.
+        - Uses RAISE_APPLICATION_ERROR to propagate errors for debugging.
+        - Ensures that only valid columns are included in hashing to avoid execution errors.
+
+    AUTHOR:       [NEAL ROUTSON]
+    CREATED ON:   [2025-03-01]
+    
+    REVISION HISTORY:
+    ---------------------------------------------------------------------------------
+    | Date       | Author       | Description of Changes                            |
+    ---------------------------------------------------------------------------------
+    | 2025-03-08 | Neal Routson | Initial Version                                   |
+    ---------------------------------------------------------------------------------
+====================================================================================*/
 CREATE OR REPLACE PROCEDURE UPDATE_HASHES_LDR (
     p_tgt_table IN VARCHAR2,
     p_pre_ldr IN NUMBER

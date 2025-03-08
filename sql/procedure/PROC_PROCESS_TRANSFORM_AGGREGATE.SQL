@@ -1,3 +1,41 @@
+/*====================================================================================
+    PROCEDURE:   PROCESS_TRANSFORM_AGGREGATE
+    PURPOSE:     This procedure applies aggregate transformations from a source table
+                 to a target table based on transformation rules stored in the 
+                 LOAD_CONFIG table.
+                 
+                 The procedure:
+                 1. Extracts transformation rules from JSON where STEP_CODE = 'TRANSFORM_AGGREGATE'.
+                 2. Dynamically constructs and executes transformation queries.
+                 3. Iterates through transformation results and updates the target table.
+                 4. Logs the executed SQL queries into LOAD_LOG_DETAIL.
+                 5. Ensures proper error handling and rollback in case of failure.
+
+    PARAMETERS:
+    --------------------------------------------------------------------------------
+    | Parameter Name       | Type      | Description                                |
+    --------------------------------------------------------------------------------
+    | p_load_log_id        | NUMBER    | ID of the load log entry                   |
+    | p_load_log_detail_id | NUMBER    | ID of the detailed log entry               |
+    | p_src_table          | VARCHAR2  | Name of the source table (TRANSFORM)       |
+    | p_tgt_table          | VARCHAR2  | Name of the target table (TRANSFORM)       |
+    --------------------------------------------------------------------------------
+
+    EXCEPTION HANDLING:
+        - Captures errors and logs them with SQL error message and stack trace.
+        - Uses RAISE_APPLICATION_ERROR to propagate errors for debugging.
+        - Ensures that the procedure does not leave partial transactions.
+
+    AUTHOR:       [NEAL ROUTSON]
+    CREATED ON:   [2025-03-01]
+    
+    REVISION HISTORY:
+    --------------------------------------------------------------------------------
+    | Date       | Author       | Description of Changes                          |
+    --------------------------------------------------------------------------------
+    | 2025-03-08 | Neal Routson | Initial Version                                 |
+    --------------------------------------------------------------------------------
+====================================================================================*/
 CREATE OR REPLACE PROCEDURE PROCESS_TRANSFORM_AGGREGATE(
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,

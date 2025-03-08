@@ -1,3 +1,38 @@
+/*====================================================================================
+    PROCEDURE:   TRUNCATE_TABLES_BY_PREFIX
+    PURPOSE:     This procedure truncates all tables whose names start with a given
+                 prefix. It dynamically finds matching table names and executes a 
+                 TRUNCATE statement for each one.
+                 
+                 The procedure:
+                 1. Validates that the provided table prefix is not NULL or empty.
+                 2. Searches for tables in the current schema that match the prefix.
+                 3. Iterates over the matching tables and truncates them.
+                 4. Logs each truncation operation using DBMS_OUTPUT.
+
+    PARAMETERS:
+    --------------------------------------------------------------------------------
+    | Parameter Name  | Type      | Description                                     |
+    --------------------------------------------------------------------------------
+    | p_table_prefix  | VARCHAR2  | Prefix of the tables to be truncated            |
+    --------------------------------------------------------------------------------
+
+    EXCEPTION HANDLING:
+        - If the prefix is NULL or empty, the procedure exits without truncating any tables.
+        - Logs error messages using DBMS_OUTPUT for debugging.
+        - Ensures that only valid table names are processed to avoid errors.
+
+    AUTHOR:       [NEAL ROUTSON]
+    CREATED ON:   [2025-03-01]
+    
+    REVISION HISTORY:
+    ---------------------------------------------------------------------------------
+    | Date       | Author       | Description of Changes                            |
+    ---------------------------------------------------------------------------------
+    | 2025-03-08 | Neal Routson | Initial Version                                   |
+    ---------------------------------------------------------------------------------
+====================================================================================*/
+
 CREATE OR REPLACE PROCEDURE TRUNCATE_TABLES_BY_PREFIX (
     p_table_prefix IN VARCHAR2
 )

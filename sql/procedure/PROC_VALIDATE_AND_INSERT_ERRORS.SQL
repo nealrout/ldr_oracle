@@ -1,3 +1,41 @@
+/*====================================================================================
+    PROCEDURE:   VALIDATE_AND_INSERT_ERRORS
+    PURPOSE:     This procedure validates data from a source table based on rules
+                 stored in the LOAD_CONFIG table and inserts any failed records
+                 into the ERR_VALIDATION table.
+                 
+                 The procedure:
+                 1. Extracts validation rules from JSON where STEP_CODE = 'VALIDATE'.
+                 2. Dynamically constructs SQL to check for validation failures.
+                 3. Loops through invalid records and inserts them into ERR_VALIDATION.
+                 4. Logs SQL executions for debugging and error tracking.
+                 5. Commits changes to ensure error records are recorded properly.
+
+    PARAMETERS:
+    --------------------------------------------------------------------------------
+    | Parameter Name       | Type      | Description                                |
+    --------------------------------------------------------------------------------
+    | p_load_log_id        | NUMBER    | ID of the load log entry                   |
+    | p_load_log_detail_id | NUMBER    | ID of the detailed log entry               |
+    | p_src_table          | VARCHAR2  | Name of the source table (STG_INPUT)       |
+    | p_tgt_table          | VARCHAR2  | Name of the target table (ERR_VALIDATION)  |
+    --------------------------------------------------------------------------------
+
+    EXCEPTION HANDLING:
+        - Captures errors and logs them with SQL error message and stack trace.
+        - Uses RAISE_APPLICATION_ERROR to propagate errors for debugging.
+        - Ensures that the procedure does not leave partial transactions.
+
+    AUTHOR:       [NEAL ROUTSON]
+    CREATED ON:   [2025-03-01]
+    
+    REVISION HISTORY:
+    ---------------------------------------------------------------------------------
+    | Date       | Author       | Description of Changes                            |
+    ---------------------------------------------------------------------------------
+    | 2025-03-08 | Neal Routson | Initial Version                                   |
+    ---------------------------------------------------------------------------------
+====================================================================================*/
 CREATE OR REPLACE PROCEDURE VALIDATE_AND_INSERT_ERRORS (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,

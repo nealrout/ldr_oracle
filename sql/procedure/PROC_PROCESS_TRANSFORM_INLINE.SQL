@@ -1,3 +1,43 @@
+/*====================================================================================
+    PROCEDURE:   PROCESS_TRANSFORM_INLINE
+    PURPOSE:     This procedure applies inline transformations from a source table
+                 to a target table based on transformation rules stored in the 
+                 LOAD_CONFIG table.
+                 
+                 The procedure:
+                 1. Extracts transformation rules from JSON where STEP_CODE = 'TRANSFORM_INLINE'.
+                 2. Dynamically constructs a SQL MERGE statement to apply transformations.
+                 3. Updates existing records if a match is found based on UNIQUE_IDENTIFIER.
+                 4. Inserts new records if no match is found.
+                 5. Logs the executed SQL queries into LOAD_LOG_DETAIL.
+                 6. Ensures proper error handling and rollback in case of failure.
+
+    PARAMETERS:
+    --------------------------------------------------------------------------------
+    | Parameter Name       | Type      | Description                                |
+    --------------------------------------------------------------------------------
+    | p_load_log_id        | NUMBER    | ID of the load log entry                   |
+    | p_load_log_detail_id | NUMBER    | ID of the detailed log entry               |
+    | p_src_table          | VARCHAR2  | Name of the source table (STG_MAP)         |
+    | p_tgt_table          | VARCHAR2  | Name of the target table (TRANSFORM)       |
+    --------------------------------------------------------------------------------
+
+    EXCEPTION HANDLING:
+        - Captures errors and logs them with SQL error message and stack trace.
+        - Uses RAISE_APPLICATION_ERROR to propagate errors for debugging.
+        - Ensures that the procedure does not leave partial transactions.
+
+    AUTHOR:       [NEAL ROUTSON]
+    CREATED ON:   [2025-03-01]
+    
+    REVISION HISTORY:
+    --------------------------------------------------------------------------------
+    | Date       | Author       | Description of Changes                           |
+    --------------------------------------------------------------------------------
+    | 2025-03-08 | Neal Routson | Initial Version                                  |
+    --------------------------------------------------------------------------------
+====================================================================================*/
+
 CREATE OR REPLACE PROCEDURE PROCESS_TRANSFORM_INLINE (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,

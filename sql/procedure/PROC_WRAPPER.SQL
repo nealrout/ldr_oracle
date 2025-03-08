@@ -1,3 +1,39 @@
+/*====================================================================================
+    PROCEDURE:   WRAPPER
+    PURPOSE:     This procedure orchestrates the execution of data processing steps
+                 in a predefined sequence, ensuring proper error handling and
+                 logging throughout the process.
+                 
+                 The procedure:
+                 1. Manages the execution of multiple processing steps in order.
+                 2. Checks for and recovers from failed or incomplete executions.
+                 3. Logs execution status in the LOAD_LOG and LOAD_LOG_DETAIL tables.
+                 4. Dynamically calls the appropriate procedures for each processing step.
+                 5. Handles errors gracefully, logging error messages and stack traces.
+
+    PARAMETERS:
+    --------------------------------------------------------------------------------
+    | Parameter Name  | Type      | Description                                     |
+    --------------------------------------------------------------------------------
+    | None           | N/A       | This procedure does not take input parameters   |
+    --------------------------------------------------------------------------------
+
+    EXCEPTION HANDLING:
+        - Captures errors and logs them with SQL error message and stack trace.
+        - Uses RAISE_APPLICATION_ERROR to propagate errors for debugging.
+        - Ensures that the procedure does not leave partial transactions.
+
+    AUTHOR:       [NEAL ROUTSON]
+    CREATED ON:   [2025-03-01]
+    
+    REVISION HISTORY:
+    -------------------------------------------------------------------------------
+    | Date       | Author       | Description of Changes                          |
+    -------------------------------------------------------------------------------
+    | 2025-03-08 | Neal Routson | Initial Version                                 |
+    -------------------------------------------------------------------------------
+====================================================================================*/
+
 CREATE OR REPLACE PROCEDURE WRAPPER
 IS
 	v_table_name VARCHAR2(200);

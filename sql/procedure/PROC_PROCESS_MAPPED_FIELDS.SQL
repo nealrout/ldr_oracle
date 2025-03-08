@@ -1,3 +1,41 @@
+/*====================================================================================
+    PROCEDURE:   PROCESS_MAPPED_FIELDS
+    PURPOSE:     This procedure processes and maps fields from a source table to a 
+                 target table based on configuration stored in the LOAD_CONFIG table.
+                 
+                 The procedure:
+                 1. Extracts mapping configurations from JSON data where STEP_CODE = 'MAP_FIELDS'.
+                 2. Dynamically constructs a SQL MERGE statement.
+                 3. Updates existing records or inserts new records into the target table.
+                 4. Ensures that only valid data is processed by checking against ERR_VALIDATION.
+                 5. Logs the generated SQL and handles exceptions gracefully.
+
+    PARAMETERS:
+    --------------------------------------------------------------------------------
+    | Parameter Name       | Type      | Description                                |
+    --------------------------------------------------------------------------------
+    | p_load_log_id        | NUMBER    | ID of the load log entry                   |
+    | p_load_log_detail_id | NUMBER    | ID of the detailed log entry               |
+    | p_src_table          | VARCHAR2  | Name of the source table (STG_INPUT)       |
+    | p_tgt_table          | VARCHAR2  | Name of the target table (STG_MAP)         |
+    --------------------------------------------------------------------------------
+
+    EXCEPTION HANDLING:
+        - Captures errors and logs them with SQL error message and stack trace.
+        - Uses RAISE_APPLICATION_ERROR to propagate errors for debugging.
+        - Ensures that the procedure does not leave partial transactions.
+
+    AUTHOR:       [NEAL ROUTSON]
+    CREATED ON:   [2025-03-01]
+    
+    REVISION HISTORY:
+    --------------------------------------------------------------------------------
+    | Date       | Author       | Description of Changes                          |
+    --------------------------------------------------------------------------------
+    | 2025-03-08 | Neal Routson | Initial Version                                 |
+    --------------------------------------------------------------------------------
+====================================================================================*/
+
 CREATE OR REPLACE PROCEDURE PROCESS_MAPPED_FIELDS (
     p_load_log_id IN NUMBER,
     p_load_log_detail_id IN NUMBER,
@@ -49,7 +87,6 @@ BEGIN
         )
         SELECT DISTINCT uniqueIdentifier, srcField, tgtField FROM cte_parsed_json
     ) LOOP
-        -- **Initialize Unique Identifier & v_merge_sql Once**
         IF v_first_loop THEN
             v_unique_identifier := rec.uniqueIdentifier;
             v_first_loop := FALSE;
