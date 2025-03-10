@@ -7,7 +7,7 @@
                  The procedure:
                  1. Extracts transformation rules from JSON where STEP_CODE = 'TRANSFORM_AGGREGATE'.
                  2. Dynamically constructs and executes transformation queries.
-                 3. Iterates through transformation results and updates the target table.
+                 3. Build Merge statement to execute transformation in one pass.
                  4. Logs the executed SQL queries into LOAD_LOG_DETAIL.
                  5. Ensures proper error handling and rollback in case of failure.
 
@@ -48,15 +48,7 @@ IS
     v_tgtTable VARCHAR2(4000);
     v_fieldName VARCHAR2(4000);
     v_transformation CLOB;
-    v_dynamic_query CLOB;
-    v_update_stmt CLOB;
-    v_existing_sql CLOB; 
-
-    TYPE cur_type IS REF CURSOR;
-    v_cursor cur_type;
-
-    v_id_value VARCHAR2(4000);
-    v_transformed_value VARCHAR2(4000);
+	v_merge_sql VARCHAR2(32767);
 
     v_procedure_name VARCHAR2(100);
     v_error_message VARCHAR2(4000);
@@ -103,52 +95,24 @@ BEGIN
         v_fieldName := rec.fieldName;
         v_transformation := rec.transformation;
 
-        DBMS_OUTPUT.PUT_LINE(v_transformation);
+--        DBMS_OUTPUT.PUT_LINE(v_transformation);
         
-        -- Open cursor to execute transformation query dynamically
-        v_dynamic_query := v_transformation;
-        DBMS_OUTPUT.PUT_LINE(v_dynamic_query);
-        OPEN v_cursor FOR v_dynamic_query;
-
-		LOOP
-		    FETCH v_cursor INTO v_id_value, v_transformed_value;
-		    EXIT WHEN v_cursor%NOTFOUND;
-		    
-		    -- Convert CLOB to VARCHAR2 and handle NULL values
-		    v_transformed_value := NVL(DBMS_LOB.SUBSTR(v_transformed_value, 4000, 1), 'NULL');
-		
-		    -- Build the UPDATE statement
-		    v_update_stmt := 'UPDATE ' || v_tgtTable || 
-		                     ' SET ' || v_fieldName || ' = ''' || v_transformed_value || ''' ' ||
-		                     ' WHERE ' || v_uniqueIdentifier || ' = ''' || v_id_value || '''';
-		
-		    DBMS_OUTPUT.PUT_LINE(v_update_stmt);
-		    
-		    -- Retrieve the current SQL field content (CLOB) from LOAD_LOG_DETAIL
-		    SELECT SQL INTO v_existing_sql FROM LOAD_LOG_DETAIL 
-		    WHERE ID = p_load_log_detail_id 
-		    FOR UPDATE;
-		
-		    -- Initialize CLOB if NULL
-		    IF v_existing_sql IS NULL THEN
-		        DBMS_LOB.CREATETEMPORARY(v_existing_sql, TRUE);
-		    END IF;
-		
-		    -- Append new update statement to the CLOB field correctly
-		    DBMS_LOB.APPEND(v_existing_sql, CHR(10) || v_update_stmt);
-		
-		    -- Update the SQL field with the appended CLOB content
-		    UPDATE LOAD_LOG_DETAIL 
-		    SET SQL = v_existing_sql
-		    WHERE ID = p_load_log_detail_id;
-            COMMIT;
-		
-		    -- Execute the dynamically built UPDATE statement
-		    EXECUTE IMMEDIATE v_update_stmt;
-		
-		END LOOP;
-
-        CLOSE v_cursor;
+        v_merge_sql := 'MERGE INTO ' || v_tgtTable || ' T '||
+        	'USING ('|| v_transformation ||') C ' ||
+        	'ON (T.' || v_uniqueIdentifier || '= C.' || v_uniqueIdentifier || ') '||
+        	'WHEN MATCHED THEN UPDATE SET T.' || v_fieldName || ' = C.STATIC_FIELD_NAME';
+     
+        DBMS_OUTPUT.PUT_LINE('SQL: ' || v_merge_sql);
+        
+	    -- Update LOAD_LOG_DETAIL WITH QUERY BEING RUN.
+	    UPDATE LOAD_LOG_DETAIL 
+	    SET SQL = v_merge_sql
+	    WHERE ID = p_load_log_detail_id;
+	    
+        COMMIT;
+	
+	    -- Execute the dynamically built UPDATE statement
+	    EXECUTE IMMEDIATE v_merge_sql;
         
     END LOOP;
     
