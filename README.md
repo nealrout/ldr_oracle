@@ -9,6 +9,8 @@ Here are some sample records thus far in my POC
 
 [ROW_LOAD_CONFIG_ACCOUNT](https://github.com/nealrout/ldr_oracle/blob/develop/sql/row/load_config/ROW_LOAD_CONFIG_ACCOUNT.sql)   
 [ROW_LOAD_CONFIG_FACILITY](https://github.com/nealrout/ldr_oracle/blob/develop/sql/row/load_config/ROW_LOAD_CONFIG_FACILITY.sql)   
+[ROW_LOAD_CONFIG_ASSET](https://github.com/nealrout/ldr_oracle/blob/develop/sql/row/load_config/ROW_LOAD_CONFIG_ASSET.sql)   
+[ROW_LOAD_CONFIG_SERVICE](https://github.com/nealrout/ldr_oracle/blob/develop/sql/row/load_config/ROW_LOAD_CONFIG_SERVICE.sql)   
 
 These configurations currently include validating data, mapping data, in line transformations, and aggregate transformations.  The OUT is still a work in progress, and will be completed shortly.
 
