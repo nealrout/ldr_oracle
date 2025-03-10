@@ -21,12 +21,12 @@ BEGIN
     
     SELECT COUNT(*) INTO v_count FROM user_indexes WHERE index_name = 'IDX_FACILITY_UPDATE_TS';
     IF v_count = 0 THEN
-        EXECUTE IMMEDIATE 'CREATE INDEX idx_facility_update_ts ON facility(update_ts)';
+        EXECUTE IMMEDIATE 'CREATE INDEX IDX_FACILITY_UPDATE_TS ON facility(update_ts)';
     END IF;
     
     SELECT COUNT(*) INTO v_count FROM user_indexes WHERE index_name = 'IDX_FACILITY_CREATE_TS';
     IF v_count = 0 THEN
-        EXECUTE IMMEDIATE 'CREATE INDEX idx_facility_create_ts ON facility(create_ts)';
+        EXECUTE IMMEDIATE 'CREATE INDEX IDX_FACILITY_CREATE_TS ON facility(create_ts)';
     END IF;
     
 END;

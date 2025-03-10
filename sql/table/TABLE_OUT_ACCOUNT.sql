@@ -24,11 +24,11 @@ BEGIN
     
     SELECT COUNT(*) INTO v_count FROM user_indexes WHERE index_name = 'IDX_ACCOUNT_UPDATE_TS';
     IF v_count = 0 THEN
-        EXECUTE IMMEDIATE 'CREATE INDEX idx_account_update_ts ON account(update_ts)';
+        EXECUTE IMMEDIATE 'CREATE INDEX IDX_ACCOUNT_UPDATE_TS ON account(update_ts)';
     END IF;
 
     SELECT COUNT(*) INTO v_count FROM user_indexes WHERE index_name = 'IDX_ACCOUNT_CREATE_TS';
     IF v_count = 0 THEN
-        EXECUTE IMMEDIATE 'CREATE INDEX idx_account_create_ts ON account(create_ts)';
+        EXECUTE IMMEDIATE 'CREATE INDEX IDX_ACCOUNT_CREATE_TS ON account(create_ts)';
     END IF;
 END;

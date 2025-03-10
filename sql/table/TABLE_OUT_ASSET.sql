@@ -22,22 +22,22 @@ BEGIN
 
     SELECT COUNT(*) INTO v_count FROM user_indexes WHERE index_name = 'IDX_ASSET_ASSET_NBR';
     IF v_count = 0 THEN
-        EXECUTE IMMEDIATE 'CREATE INDEX idx_asset_asset_nbr ON asset(asset_nbr, status_code)';
+        EXECUTE IMMEDIATE 'CREATE INDEX IDX_ASSET_ASSET_NBR ON asset(asset_nbr, status_code)';
     END IF;
     
     SELECT COUNT(*) INTO v_count FROM user_indexes WHERE index_name = 'IDX_ASSET_SYS_ID';
     IF v_count = 0 THEN
-        EXECUTE IMMEDIATE 'CREATE INDEX idx_asset_sys_id ON asset(sys_id, status_code)';
+        EXECUTE IMMEDIATE 'CREATE INDEX IDX_ASSET_SYS_ID ON asset(sys_id, status_code)';
     END IF;
     
     SELECT COUNT(*) INTO v_count FROM user_indexes WHERE index_name = 'IDX_ASSET_UPDATE_TS';
     IF v_count = 0 THEN
-        EXECUTE IMMEDIATE 'CREATE INDEX idx_asset_update_ts ON asset(update_ts)';
+        EXECUTE IMMEDIATE 'CREATE INDEX IDX_ASSET_UPDATE_TS ON asset(update_ts)';
     END IF;
 
     SELECT COUNT(*) INTO v_count FROM user_indexes WHERE index_name = 'IDX_ASSET_CREATE_TS';
     IF v_count = 0 THEN
-        EXECUTE IMMEDIATE 'CREATE INDEX idx_asset_create_ts ON asset(create_ts)';
+        EXECUTE IMMEDIATE 'CREATE INDEX IDX_ASSET_CREATE_TS ON asset(create_ts)';
     END IF;
 
 END;

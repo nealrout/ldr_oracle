@@ -22,17 +22,17 @@ BEGIN
 
     SELECT COUNT(*) INTO v_count FROM user_indexes WHERE index_name = 'IDX_SERVICE_SERVICE_CODE';
     IF v_count = 0 THEN
-        EXECUTE IMMEDIATE 'CREATE INDEX idx_service_service_code ON service(service_code, status_code)';
+        EXECUTE IMMEDIATE 'CREATE INDEX IDX_SERVICE_SERVICE_CODE ON service(service_code, status_code)';
     END IF;
 
     SELECT COUNT(*) INTO v_count FROM user_indexes WHERE index_name = 'IDX_SERVICE_UPDATE_TS';
     IF v_count = 0 THEN
-        EXECUTE IMMEDIATE 'CREATE INDEX idx_service_update_ts ON service(update_ts)';
+        EXECUTE IMMEDIATE 'CREATE INDEX IDX_SERVICE_UPDATE_TS ON service(update_ts)';
     END IF;
 
     SELECT COUNT(*) INTO v_count FROM user_indexes WHERE index_name = 'IDX_SERVICE_CREATE_TS';
     IF v_count = 0 THEN
-        EXECUTE IMMEDIATE 'CREATE INDEX idx_service_create_ts ON service(create_ts)';
+        EXECUTE IMMEDIATE 'CREATE INDEX IDX_SERVICE_CREATE_TS ON service(create_ts)';
     END IF;
     
 END;
