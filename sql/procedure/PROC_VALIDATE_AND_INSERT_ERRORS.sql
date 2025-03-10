@@ -45,13 +45,13 @@ CREATE OR REPLACE PROCEDURE VALIDATE_AND_INSERT_ERRORS (
     v_sql VARCHAR2(4000);
     v_unique_identifier VARCHAR2(4000);
     v_unique_identifier_value VARCHAR2(4000);
-    v_field_name VARCHAR2(255);
+    v_field_name VARCHAR2(250);
     v_validation VARCHAR2(4000);
     v_cursor SYS_REFCURSOR;
     
     TYPE rec_type IS RECORD (
         unique_identifier VARCHAR2(4000),
-        field_name VARCHAR2(255),
+        field_name VARCHAR2(250),
         validation VARCHAR2(4000)
     );
     

@@ -9,11 +9,11 @@ BEGIN
     EXECUTE IMMEDIATE '
         CREATE TABLE facility (
             id NUMBER(19,0) GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            account_id NUMBER(19,0) not null,
-            facility_nbr VARCHAR2(255) not null,
-            facility_code VARCHAR2(255) null,
-            facility_name VARCHAR2(255) null,
-            create_ts TIMESTAMP WITH TIME ZONE null,
+            account_id NUMBER(19,0) NOT NULL,
+            facility_nbr VARCHAR2(250) NOT NULL,
+            facility_code VARCHAR2(250),
+            facility_name VARCHAR2(250),
+            create_ts TIMESTAMP WITH TIME ZONE,
             update_ts TIMESTAMP WITH TIME ZONE DEFAULT SYSTIMESTAMP
         )';
 

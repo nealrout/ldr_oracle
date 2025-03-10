@@ -9,11 +9,11 @@ BEGIN
     EXECUTE IMMEDIATE '
         CREATE TABLE asset (
             id NUMBER(19,0) GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            facility_id NUMBER(19,0) not null,
-            asset_nbr VARCHAR2(255) not null,
-            asset_code VARCHAR2(255) null,
-            sys_id VARCHAR2(255) null,
-            status_code VARCHAR2(255) default ''UNKNOWN'' not null,
+            facility_id NUMBER(19,0) NOT NULL,
+            asset_nbr VARCHAR2(250) NOT NULL,
+            asset_code VARCHAR2(250),
+            sys_id VARCHAR2(250),
+            status_code VARCHAR2(250) default ''UNKNOWN'' NOT NULL,
             create_ts TIMESTAMP WITH TIME ZONE,
             update_ts TIMESTAMP WITH TIME ZONE DEFAULT SYSTIMESTAMP
         )';

@@ -65,8 +65,9 @@ IS
     v_start BOOLEAN := FALSE; -- Flag to start execution
     v_source_table VARCHAR2(250);
     v_target_table VARCHAR2(250);
+	v_alias VARCHAR2(250);
 BEGIN
-	DBMS_OUTPUT.PUT_LINE('________________WRAPPER STARING________________');
+	DBMS_OUTPUT.PUT_LINE('___________________________WRAPPER STARING___________________________');
 
 	-- PRE-TRUNCATE ALL STG TABLES
 	TRUNCATE_TABLES_BY_PREFIX('STG_MAP_');
@@ -119,21 +120,24 @@ BEGIN
 	/*************************************************************************************
 	 * 								LOAD_LOG_DETAIL LOGIC
 	 *************************************************************************************/
-	IF v_count_running > 0 THEN															--RECOVER LAST RUNNING LOAD_LOG_DETAIL
+	IF v_count_running > 0 THEN															
+		--RECOVER LAST RUNNING LOAD_LOG_DETAIL
 		SELECT ID, STEP_CODE INTO v_load_log_detail_id, v_load_step_code
 		FROM LOAD_LOG_DETAIL 
 		WHERE LOAD_LOG_ID = v_load_log_id AND STATUS_CODE = v_status_code_running 
 		ORDER BY START_TS DESC
 		FETCH FIRST 1 ROW ONLY;
 		DBMS_OUTPUT.PUT_LINE('RECOVERING - LOAD_LOG_DETAILS - STEP_CODE: ' || v_load_step_code || ', STATUS_CODE: ' || v_status_code_running);
-	ELSIF v_count_failed > 0 THEN														--RECOVER LAST FAILED LOAD_LOG_DETAIL
+	ELSIF v_count_failed > 0 THEN
+		--RECOVER LAST FAILED LOAD_LOG_DETAIL														
 		SELECT ID, STEP_CODE INTO v_load_log_detail_id, v_load_step_code
 		FROM LOAD_LOG_DETAIL 
 		WHERE LOAD_LOG_ID = v_load_log_id AND STATUS_CODE = v_status_code_failed 
 		ORDER BY START_TS DESC
 		FETCH FIRST 1 ROW ONLY;
 		DBMS_OUTPUT.PUT_LINE('RECOVERING - LOAD_LOG_DETAILS - STEP_CODE: ' || v_load_step_code || ', STATUS_CODE: ' || v_status_code_failed);
-	ELSIF v_count_running = 0 AND v_count_failed = 0 AND v_count_success > 0 THEN		-- NO RUNNING, NO FAILURE, START NEXT STEP
+	ELSIF v_count_running = 0 AND v_count_failed = 0 AND v_count_success > 0 THEN		
+		-- NO RUNNING, NO FAILURE, START NEXT STEP
 		SELECT STEP_CODE INTO v_load_step_code_last_success
 		FROM LOAD_LOG_DETAIL
 		WHERE LOAD_LOG_ID = v_load_log_id AND STATUS_CODE = v_status_code_success
@@ -144,33 +148,36 @@ BEGIN
 		FROM LOAD_STEP
 		WHERE STEP_CODE = v_load_step_code_last_success;
 		
-		IF v_current_step_number < v_max_step_number THEN								-- ONLY INSERT NEXT STEP IF WE HAVE NOT SUCCEEEDED ON LAST STEP.
+		IF v_current_step_number < v_max_step_number THEN								
+			-- ONLY SET NEXT STEP IF WE HAVE NOT SUCCEEEDED ON LAST POSSIBLE STEP IN THE CHAIN.
 		
 			SELECT STEP_CODE INTO v_load_step_code 
 			FROM LOAD_STEP
 			WHERE STEP_NUMBER = (v_current_step_number + 1);
 			
-			DBMS_OUTPUT.PUT_LINE('INSERTING - LOAD_LOG_DETAILS - STEP_CODE: ' || v_load_step_code || ', STATUS_CODE: ' || v_status_code_running);
-			INSERT INTO LOAD_LOG_DETAIL (LOAD_LOG_ID, STEP_CODE, STATUS_CODE, START_TS)
-			VALUES (v_load_log_id, v_load_step_code, v_status_code_running, SYSTIMESTAMP)
-			RETURNING ID INTO v_load_log_detail_id;
+			-- DBMS_OUTPUT.PUT_LINE('INSERTING - LOAD_LOG_DETAILS - STEP_CODE: ' || v_load_step_code || ', STATUS_CODE: ' || v_status_code_running);
+			-- INSERT INTO LOAD_LOG_DETAIL (LOAD_LOG_ID, STEP_CODE, STATUS_CODE, START_TS)
+			-- VALUES (v_load_log_id, v_load_step_code, v_status_code_running, SYSTIMESTAMP)
+			-- RETURNING ID INTO v_load_log_detail_id;
 			
 			COMMIT;
 		END IF;
 
-	ELSE 																				-- BRAND NEW RUN OF LOAD_LOG_DETAILS
-		DBMS_OUTPUT.PUT_LINE('INSERTING - LOAD_LOG_DETAILS - STEP_CODE: ' || v_load_step_first || ', STATUS_CODE: ' || v_status_code_running);
-		INSERT INTO LOAD_LOG_DETAIL (LOAD_LOG_ID, STEP_CODE, STATUS_CODE, START_TS)
-		VALUES (v_load_log_id, v_load_step_first, v_status_code_running, SYSTIMESTAMP)
-		RETURNING ID INTO v_load_log_detail_id;
+	ELSE 																				
+		-- BRAND NEW RUN OF LOAD_LOG_DETAILS
+
+		-- DBMS_OUTPUT.PUT_LINE('INSERTING - LOAD_LOG_DETAILS - STEP_CODE: ' || v_load_step_first || ', STATUS_CODE: ' || v_status_code_running);
+		-- INSERT INTO LOAD_LOG_DETAIL (LOAD_LOG_ID, STEP_CODE, STATUS_CODE, START_TS)
+		-- VALUES (v_load_log_id, v_load_step_first, v_status_code_running, SYSTIMESTAMP)
+		-- RETURNING ID INTO v_load_log_detail_id;
 	
-		COMMIT;
+		-- COMMIT;
 	
 		v_load_step_code := v_load_step_first;
 	END IF;
 	
 	
-	DBMS_OUTPUT.PUT_LINE('v_load_log_id' || v_load_log_id || ', v_load_log_detail_id: '|| v_load_log_detail_id || ', v_load_step_code: ' || v_load_step_code);
+	DBMS_OUTPUT.PUT_LINE('DEBUG - v_load_log_id: ' || v_load_log_id || ', v_load_log_detail_id: '|| v_load_log_detail_id || ', v_load_step_code: ' || v_load_step_code);
 	/*************************************************************************************
 	 * 								PROCESSOR LOGIC
 	 *************************************************************************************
@@ -203,12 +210,14 @@ BEGIN
 
             -- Open cursor dynamically for each step
             FOR rec IN (
-                SELECT SRC_TABLE, TGT_TABLE 
+                SELECT SRC_TABLE, TGT_TABLE, ALIAS
                 FROM LOAD_CONFIG 
                 WHERE STEP_CODE = v_steps(i)
+				ORDER BY STEP_ORDER ASC
             ) LOOP
                 v_source_table := rec.SRC_TABLE;
                 v_target_table := rec.TGT_TABLE;
+				v_alias := rec.ALIAS;
             
             	SELECT COUNT(*) INTO v_count FROM LOAD_LOG_DETAIL WHERE ID = v_load_log_detail_id AND SRC_TABLE IS NULL AND TGT_TABLE IS NULL;
             
@@ -216,13 +225,14 @@ BEGIN
             		UPDATE LOAD_LOG_DETAIL SET SRC_TABLE = v_source_table, TGT_TABLE = v_target_table WHERE ID = v_load_log_detail_id;
             	ELSE
 	            	DBMS_OUTPUT.PUT_LINE('INSERTING LOAD_LOG_DETAILS - STEP_CODE: ' || v_load_step_code || ', STATUS_CODE: ' || v_status_code_running);
-					INSERT INTO LOAD_LOG_DETAIL (LOAD_LOG_ID, STEP_CODE, SRC_TABLE, TGT_TABLE, STATUS_CODE, START_TS)
-					VALUES (v_load_log_id, v_load_step_code, v_source_table, v_target_table, v_status_code_running, SYSTIMESTAMP)
+					INSERT INTO LOAD_LOG_DETAIL (LOAD_LOG_ID, ALIAS, STEP_CODE, SRC_TABLE, TGT_TABLE, STATUS_CODE, START_TS)
+					VALUES (v_load_log_id, v_alias, v_load_step_code, v_source_table, v_target_table, v_status_code_running, SYSTIMESTAMP)
 					RETURNING ID INTO v_load_log_detail_id;
             	END IF;
 
             	DBMS_OUTPUT.PUT_LINE('****************************************************************************');
                 DBMS_OUTPUT.PUT_LINE('####Executing: ' || v_procedures(v_load_step_code) || 
+                                     ' ALIAS: ' || v_alias || 
                                      ' with SRC_TABLE: ' || v_source_table || 
                                      ', TGT_TABLE: ' || v_target_table ||
                 					 ', v_load_log_id: ' || v_load_log_id ||
@@ -239,7 +249,7 @@ BEGIN
 	                    ); END;'
 	                USING v_load_log_id, v_load_log_detail_id, v_source_table, v_target_table;
                 
-                    UPDATE LOAD_LOG_DETAIL SET STATUS_CODE = v_status_code_success WHERE ID = v_load_log_detail_id;
+                    UPDATE LOAD_LOG_DETAIL SET STATUS_CODE = v_status_code_success, END_TS = SYSTIMESTAMP WHERE ID = v_load_log_detail_id;
 		            COMMIT;
                     
 					EXCEPTION
@@ -282,8 +292,8 @@ BEGIN
         END IF;
     END LOOP;
             
-    UPDATE LOAD_LOG SET STATUS_CODE = v_status_code_success WHERE ID = v_load_log_id;
-    DBMS_OUTPUT.PUT_LINE('________________WRAPPER COMPLETED SUCCESSFULLY________________');
+    UPDATE LOAD_LOG SET STATUS_CODE = v_status_code_success, END_TS = SYSTIMESTAMP WHERE ID = v_load_log_id;
+    DBMS_OUTPUT.PUT_LINE('___________________________WRAPPER COMPLETED SUCCESSFULLY___________________________');
 
 EXCEPTION
     WHEN OTHERS THEN
@@ -292,79 +302,3 @@ EXCEPTION
         COMMIT;
         RAISE;
 END WRAPPER;
-
-/*		BELOW ARE MANUAL EXECUTIONS OF THE PROCEDURES WITHOUT THE WRAPPER (FOR TESTING)
---------------------------------------------------------------------------------
-								ACCOUNT
---------------------------------------------------------------------------------
-BEGIN
-	
-	VALIDATE_AND_INSERT_ERRORS(
-        p_load_log_id => -1,
-        p_load_log_detail_id => -1,
-        p_src_table => 'STG_INPUT_01',
-        p_tgt_table => 'ERR_VALIDATION'
-    );
-
-END;
-
-BEGIN
-    PROCESS_MAPPED_FIELDS(
-        p_load_log_id => -11,           
-        p_load_log_detail_id => -2,    
-        p_src_table => 'STG_INPUT_01',
-        p_tgt_table => 'STG_MAP_01'
-    );
-END;
-BEGIN
-	PROCESS_TRANSFORM_INLINE(
-		p_load_log_id => -1,           
-		p_load_log_detail_id => -4,    
-		p_src_table => 'STG_MAP_01',
-		p_tgt_table => 'STG_TRANSFORM_01'
-	);
-END;
-
---------------------------------------------------------------------------------
-								FACILITY
---------------------------------------------------------------------------------
-BEGIN
-	
-	VALIDATE_AND_INSERT_ERRORS(
-        p_load_log_id => -1,
-        p_load_log_detail_id => -1,
-        p_src_table => 'STG_INPUT_02',
-        p_tgt_table => 'ERR_VALIDATION'
-    );
-END;
-
-BEGIN
-	
-    PROCESS_MAPPED_FIELDS(
-        p_load_log_id => -11,           
-        p_load_log_detail_id => -2,    
-        p_src_table => 'STG_INPUT_02',
-        p_tgt_table => 'STG_MAP_02'
-    );
-END;
-
-BEGIN
-	
-	PROCESS_TRANSFORM_INLINE(
-		p_load_log_id => -1,           
-		p_load_log_detail_id => -4,    
-		p_src_table => 'STG_MAP_02',
-		p_tgt_table => 'STG_TRANSFORM_02'
-	);
-END;
-
-BEGIN
-	
-	PROCESS_TRANSFORM_AGGREGATE(
-		p_load_log_id => -1,           
-		p_load_log_detail_id => -4,    
-		p_src_table => 'STG_TRANSFORM_02',
-		p_tgt_table => 'STG_TRANSFORM_01'
-	);
-END;
-*/

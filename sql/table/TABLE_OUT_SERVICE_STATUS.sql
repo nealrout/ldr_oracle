@@ -8,8 +8,8 @@ BEGIN
     
     EXECUTE IMMEDIATE '
         CREATE TABLE service_status (
-            status_code VARCHAR2(255) PRIMARY KEY,
-            create_ts TIMESTAMP WITH TIME ZONE null,
+            status_code VARCHAR2(250) PRIMARY KEY,
+            create_ts TIMESTAMP WITH TIME ZONE,
             update_ts TIMESTAMP WITH TIME ZONE DEFAULT SYSTIMESTAMP
         )';
 END;

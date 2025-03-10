@@ -9,12 +9,12 @@ BEGIN
     EXECUTE IMMEDIATE '
         CREATE TABLE service (
             id NUMBER(19,0) GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-            asset_id NUMBER(19,0) not null,
-            service_nbr VARCHAR2(255) not null,
-            service_code VARCHAR2(255) null,
-            service_name VARCHAR2(255) null,
-            status_code VARCHAR2(255) default ''UNKNOWN'' not null,
-            create_ts TIMESTAMP WITH TIME ZONE null,
+            asset_id NUMBER(19,0) NOT NULL,
+            service_nbr VARCHAR2(250) NOT NULL,
+            service_code VARCHAR2(250),
+            service_name VARCHAR2(250),
+            status_code VARCHAR2(250) default ''UNKNOWN'' NOT NULL,
+            create_ts TIMESTAMP WITH TIME ZONE,
             update_ts TIMESTAMP WITH TIME ZONE DEFAULT SYSTIMESTAMP
         )';
 

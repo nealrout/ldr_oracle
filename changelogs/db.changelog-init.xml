@@ -107,13 +107,13 @@
         <sqlFile path="sql/row/load_config/ROW_LOAD_CONFIG_SERVICE.sql" splitStatements="false"/>
     </changeSet>
 <!-- *************************CONFIG END************************************-->
-    <changeSet id="ROW_LOAD_LOG" author="neal" runAlways="true" context="init">
+    <!-- <changeSet id="ROW_LOAD_LOG" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/ROW_LOAD_LOG.sql" splitStatements="false"/>
     </changeSet>
 
     <changeSet id="ROW_LOAD_LOG_DETAIL" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/ROW_LOAD_LOG_DETAIL.sql" splitStatements="false"/>
-    </changeSet>
+    </changeSet> -->
 
     <changeSet id="ROW_STG_ACCOUNT" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/row/ROW_STG_ACCOUNT.sql" splitStatements="false"/>
@@ -171,6 +171,10 @@
 
     <changeSet id="PROC_UPDATE_HASHES" author="neal" runAlways="true" context="init">
         <sqlFile path="sql/procedure/PROC_UPDATE_HASHES.sql" splitStatements="false"/>
+    </changeSet>
+
+    <changeSet id="PROC_WRAPPER" author="neal" runAlways="true" context="init">
+        <sqlFile path="sql/procedure/PROC_WRAPPER.sql" splitStatements="false"/>
     </changeSet>
 
 </databaseChangeLog>
