@@ -65,7 +65,7 @@ BEGIN
             '{"transformations":
                 [
                     {"fieldName":"FIELD_011"
-                    ,"transformation":"SELECT ACCOUNT.FIELD_001, COUNT(*) AS STATIC_FIELD_NAME 
+                    ,"transformation":"SELECT ACCOUNT.FIELD_001 AS INNER_MERGE_KEY, COUNT(*) AS STATIC_FIELD_NAME 
                                         FROM STG_TRANSFORM_02 FACILITY
                                         JOIN STG_TRANSFORM_01 ACCOUNT ON FACILITY.FIELD_002 = ACCOUNT.FIELD_001
                                         GROUP BY ACCOUNT.FIELD_001"}

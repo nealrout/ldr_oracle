@@ -97,9 +97,9 @@ BEGIN
 
 --        DBMS_OUTPUT.PUT_LINE(v_transformation);
         
-        v_merge_sql := 'MERGE INTO ' || v_tgtTable || ' T '||
-        	'USING ('|| v_transformation ||') C ' ||
-        	'ON (T.' || v_uniqueIdentifier || '= C.' || v_uniqueIdentifier || ') '||
+        v_merge_sql := 'MERGE INTO ' || v_tgtTable || ' T ' ||
+        	'USING (' || v_transformation || ') C ' ||
+        	'ON (T.' || v_uniqueIdentifier || '= C.INNER_MERGE_KEY) ' ||
         	'WHEN MATCHED THEN UPDATE SET T.' || v_fieldName || ' = C.STATIC_FIELD_NAME';
      
         DBMS_OUTPUT.PUT_LINE('SQL: ' || v_merge_sql);
